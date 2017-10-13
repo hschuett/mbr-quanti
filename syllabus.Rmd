@@ -1,7 +1,6 @@
 ---
 output: 
   pdf_document:
-    keep_tex: true
     fig_caption: yes
     latex_engine: pdflatex
     template: templates/svm-latex-syllabus.tex
@@ -12,10 +11,10 @@ author: Harm Schuett
 date: "Winter 2016/2017"
 
 email: "schuett@bwl.lmu.de"
-web: "svmiller.com/teaching"
+web: "github.com/hschuett/mbr-quanti"
 officehours: "tba"
-office: "Ludwigstraße 28RG / Room 423"
-classroom: "Ludwigstraße 28RG / Room 416"
+office: "Ludwigstrasse 28RG / Room 423"
+classroom: "Ludwigstrasse 28RG / Room 416"
 classhours: "9:00 am - 5:00 p.m."
 
 fontfamily: mathpazo
@@ -33,7 +32,7 @@ bib <- ReadBib("literature/bibliography.bib")
 myopts <- BibOptions(bib.style = "authoryear", style="latex", first.inits=FALSE, max.names = 20)
 ```
 
-**This Syllabus will be updated continuously till January 10th 2017**
+**This Syllabus is preliminary and will be updated continuously (and uploaded to github) till January 9th 2018**
 
 \begin{center}
 \textbf{Course Dates}
@@ -41,34 +40,38 @@ myopts <- BibOptions(bib.style = "authoryear", style="latex", first.inits=FALSE,
 
 | Day | Date               | Room  | Time            |
 |-----|--------------------|-------|-----------------|
-| 1   | Tue, 9.  Jan, 2017 | 416   | 9 am - 5 pm     |
-| 2   | Thu, 11. Jan, 2017 | 416   | 11:30 am - 7 pm |
-| 3   | Wed, 17. Jan, 2017 | B-103 | 9 am - 5 pm     |
-| 4   | Fri, 19. Jan, 2017 | 416   | 9 am - 5 pm     |
-| 5   | Mon, 22. Jan, 2017 | 416   | 9 am - 5 pm     |
-| 6   | Mon, 29. Jan, 2017 | 416   | 9 am - 5 pm     |
+| 1   | Tue, 9.  Jan, 2018 | 416   | 9 am - 5 pm     |
+| 2   | Thu, 11. Jan, 2018 | 416   | 11:30 am - 7 pm |
+| 3   | Wed, 17. Jan, 2018 | B-103 | 9 am - 5 pm     |
+| 4   | Fri, 19. Jan, 2018 | 416   | 9 am - 5 pm     |
+| 5   | Mon, 22. Jan, 2018 | 416   | 9 am - 5 pm     |
+| 6   | Mon, 29. Jan, 2018 | 416   | 9 am - 5 pm     |
 
 # Course Description
 
-This course is intended to teach you the basics and intermediate elements of the current state of empirical methods in economics. We will start with linear regression and work our way up to extensions such as fixed effects estimators, Difference-in-Difference estimators. We'll switch to matching estimators and highlight its link to normal regression analysis, then spend quite some time on instrumental variables approaches and similar approaches to causal inference. We will expand the linear regression framework to so called "general linear models" in order to analyze ordinal and nominal variables (e.g., logistic regression). The course will end with a glance at the advanced topics of GMM, Bayesian Statistics, and Shrinkage. Throughout the course, the focus, especially at the beginning, will be to develop a solid understanding of the key statistical concepts and tools, underlying modern empirical thinking: Identifcation, potential outcomes, causal graphs, inference in the presence of uncertainty. My hope is that if you grasp these you will: 
+![The many headaches of an empirical analysis](figures/fig-syllabus.pdf)
 
-1. have a clear idea how to setup up any empirical test (e.g., what estimator to choose, which variables to include, which **not** to include),
-1. see the connections between all discussed approaches: how they are different ways of exploiting variation in the data based on what you assume about the underlying data, 
-1. be able to teach yourself any of the more advanced topics we did not have time to cover.
+This course is intended to teach you the three key pillars of econometrics: Identification (what can be learned in principle?), Estimation (how best to learn it?), Inference (how certain can we be in what we learned?). We will start with linear regression and work our way up to extensions such as fixed effects estimators, and Difference-in-Difference estimators. We'll switch to matching estimators and highlight its link to normal regression analysis, then spend quite some time on instrumental variables and similar approaches to causal inference. We will expand the linear regression framework to so called "general linear models" in order to analyze ordinal and nominal variables (e.g., logistic regression). If time permits, the course will end with a glance at the advanced topics of General Method of Moments, Bayesian Statistics, and Shrinkage. Throughout the course, the focus will be to develop a solid understanding of the key statistical concepts and tools, underlying modern empirical thinking: Identifcation and inference in the presence of uncertainty, potential outcomes, and graph theory. My hope is that if you grasp these you will: 
+
+1. be able to structure testable hypotheses and classify each challenge of testing those hypotheses as one of the three basic identification problems: confounding bias, endogenenous selection bias, and overcontrol bias.
+1. have a clear idea how to setup up an empirical test (e.g., what estimator to choose, which variables to include, which **not** to include),
+1. see the connections between all discussed approaches: how they offer different ways of exploiting variation in the data based on what you assume about the underlying data,
+1. have gained enough econometric understanding to not shy aways form approaching advanced topics on your own.
 
 # Required Software
 
-All of the course will be taught in R. The course handouts will be R-Notebooks (In fact the course syllabus is compiled from a R-Markdown document). So please, bring a laptop with the newest [R version](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/)  installed. Both is free software, which is part of the reason why I chose to hold the course in R. The other is that R and Python have taken the Data community [by storm](http://r4stats.com/2017/02/28/r-passes-sas/) during the last few years and you will likely need to know both in the future. Try to play around with R a bit before the course starts. Part of the course will be to teach you R. But it helps immensely if you try to find your way around before. In particular, figure out how to install additional packages from within RStudio (check for instance [R for Data Science](http://r4ds.had.co.nz/)) and install the following packages:
+All of the course will be taught in R. You will be given code and learn how to implement all the covered topics in R. The course handouts will be R-Notebooks (In fact the course syllabus is compiled from a R-Markdown document). So please, bring a laptop with the newest [R version](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) installed to each class. Both is free software, which is part of the reason why I chose to hold the course in R. The other is that R and Python have taken the data and scientific community [by storm](http://r4stats.com/2017/02/28/r-passes-sas/) during the last few years and you will likely need to know both in the future. Try to play around with R a bit before the course starts. Part of the course will be to teach you R. But it helps immensely if you try to find your way around before. In particular, figure out how to install additional packages from within RStudio (check for instance [R for Data Science](http://r4ds.had.co.nz/)) and install the following packages:
 
 - tidyverse
 - lfe
 - haven
+- igraph
 - *(list will be updated)*
 
 
-# Recommended Reading for Empiricists
+# Reading
 
-You don't have to read these. But I encourage you to have access to at lease the first two. And if you will later do empirical work, you definitely want to have the first three ready at hand. *(Note, that Gelman and Hill are significantly revising their book at the Moment. A new version is expected some time in 2018)*
+On a few days, I will post after-class reading. The reading will typically consist of well-written, short review articles or great exemplary empirical studies that will help repeating and understanding the material we covered. Below, please find a list of recommended text books. You don't have to read these. But I encourage you to have access to at least the first two in case you want to check up on material. And if you do empirical work later on, you definitely want to have some of them ready at hand. *(Note that Gelman and Hill are significantly revising their book at the moment. A new version is expected some time in 2018)*
 
 ## Great Textbooks
 
@@ -96,43 +99,48 @@ The grade will be determined by an exam at the end of the course. *Details on th
 
 ## E-mail Policy
 
-You can always write me an e-mail. I am usually quick to respond to student e-mails. If you have longer questions however, I would prefer if you would come to my office hours; it's a more efficient use of your and my time in that case. As a general rule, if you have an administrative quesiton, please look at the syllabus first. I will sometimes choose not to answer emails with questions that should be clear from just looking at the final syllabus at the end of December. 
+You can always write me an e-mail; I am usually quick to respond. If you have longer questions however, I would prefer if you would come to my office hours. It is a more efficient use of your and my time in that case. As a general rule, if you have an administrative question, please look at the syllabus first. I will not answer emails with questions that should be clear from just looking at the final syllabus at the end of December. 
 
 
 
 # Class Schedule
 
-## Tue, 9. Jan, 2017 - Day 1: Inference in the Presence of Uncertainty
+## Tue, 9. Jan, 2018 - Day 1: Inference in the Presence of Uncertainty
 
 ### Part 1: Statistical Basics
 
-- Introduction to econometric and statistical thinking.
+- Introduction to econometric and statistical thinking
 - The goal of most of scientific analyis: inference (vs. say prediction)
+- Identification as a population concept versus inferring from samples
+- Intro to graph theory
 
 *Excercise part: Intro to R + simulation and real data excercises to understand inference under uncertainty*
 
 ### Part 2: Regession Analysis I
 
-- Introduction to linear regression models.
-- Assumptions and properties of linear regression models.
+- Introduction to linear regression models
+- Basic assumptions and properties of linear regression models
 
-*Excercise part: Paper case 1: replicating a study, reporting, interpreting, and analyzing regression output.*
+*Excercise part: Paper case 1: Replicating a study, reporting, interpreting, and analyzing regression output.*
 
 
-## Thu, 11. Jan, 2017 - Day 2: Identification
+## Thu, 11. Jan, 2018 - Day 2: Identification
 
 **ATTENTION: Because of a conflict with another MBR course, we will start at 11:30 am and finish at 7:00 pm on Tuesday the 11th.**
 
-### Part 1: Causality, Identification, Potential Outcomes
+### Part 1: Causality, Identification
+
 - How to structure an empirical test using the potential outcomes and causal diagram frameworks
 - Confounders, endogeneity, and correlated omitted variable bias
+- The three basic identification problems: confounding bias, endogenenous selec-
+tion bias, and overcontrol bias
 
 *Excercise part: Simulation and real data excercises to understand causes of consequences of confounding variables*
 
 
 ### Part 2: Regession Analysis II
 
-- Regresion model properties in the presence of confounders.
+- Regression model properties in the presence of confounders.
 - Posttreatment and Pretreatment variables.
 - The problem with controlling for posttreatment variables.
 - How to design a regression test. How not to test for mediation.
@@ -140,14 +148,14 @@ You can always write me an e-mail. I am usually quick to respond to student e-ma
 
 *Excercise part: simulations + replicating a study.*
 
-**Relevant literature**
+**After-class Reading:**
 
 ```{r, echo = FALSE, results="asis"} 
-bib["Acharya.2016"]
+bib["Elwert.2014"]
 ``` 
 
 
-## Wed, 17. Jan, 2017 - Day 3: Matching Estimators and Panel Models
+## Wed, 17. Jan, 2018 - Day 3: Matching Estimators and Panel Models
 
 **ATTENTION: This day will be held in a different room: Edmund-Rumpler-Str. 13, B-103. Sorry for the inconvenience.**
 
@@ -156,11 +164,11 @@ bib["Acharya.2016"]
 - Introducing advantages and disadvantages of panel models
 - Using panel models to control for unobserved confounders.
 
-*Excercise part: Replicating a study and computig fixed-effects models.*
+*Excercise part: Replicating a study and computing fixed-effects models.*
 
 ### Part 2: Potential Outcomes and Control Groups
 
-- Revisiting the control group framework
+- The potential outcomes framework
 - Selection-on-obervables via matching
 - Modern matching procedures
 - Comparison to linear regression
@@ -168,13 +176,13 @@ bib["Acharya.2016"]
 
 *Excercise part: Replicating a study and comparing matching and regression estimates.*
 
-## Fr, 19. Jan, 2017 - Day 4: Instrumental Variables
+## Fr, 19. Jan, 2018 - Day 4: Instrumental Variables
 
 ### Part 1: Instrumental Variables - The Claim to Fame of Econometrics
 
 - Instrumental Variables as a way to circumvent confounding variables
 - The logic of instrumental variables via the causal path framework
-- Estimation issued with instrumental variables. 
+- Estimation issues with instrumental variables. 
 - Why you should always look for instrumental variables and why you shouldn't
 
 *Excercise part: tba.*
@@ -187,11 +195,11 @@ bib["Acharya.2016"]
 
 *Excercise part: tba.*
 
-## Mon, 22. Jan, 2017 - Day 5: Natural Experiments
+## Mon, 22. Jan, 2018 - Day 5: Natural Experiments
 
 ### Part 1: Diff-in-Diff 
 
-- The ideal case: finding a natural experiment. Allmost as good as randomly assigned.
+- The ideal case: finding a natural experiment. Almost as good as randomly assigned.
 - Pre-/post treatment for treatment and control group in a natural experiment.
 - The all-important common trends assumption.
 
@@ -205,7 +213,7 @@ bib["Acharya.2016"]
 
 *Excercise part: tba.*
 
-## Mon, 29. Jan, 2017 - Day 6: General Linear Models and Advanced Topics
+## Mon, 29. Jan, 2018 - Day 6: General Linear Models and Advanced Topics
 
 ### Part 1: General linear models 
 
