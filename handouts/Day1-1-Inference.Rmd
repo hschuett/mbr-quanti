@@ -1,0 +1,221 @@
+---
+title: "Quantitative Methods -- Day 1: Inference"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+```{r}
+# imports
+```
+
+# Thinking about Causality and How We use Probability
+
+## Nothing in the world is random
+
+> Our goal is to understand the behavioral process that leads to the agent’s choice. We take a causal perspective. There are factors that collectively determine, or cause, the agent’s choice. Some of these factors are observed by the researcher and some are not. The observed factors are labeled $x$, and the unobserved factors $\epsilon$. The factors relate to the agent’s choice through a function $y = h(x, \epsilon)$. This function is called the behavioral process. It is deterministic in the sense that given $x$ and $\epsilon$, the choice of the agent is fully determined. Since $\epsilon$ is not observed, the agent’s choice is not deterministic and cannot be predicted exactly. Instead, the probability of any particular outcome is derived. [@Train.2009, p.3]
+
+The above quote sums up the key perspective that is necessary to understand statistical infererence, which is the main mode of thinking when you are an empiricist. You can think of an empirical study as an attempt to estimate an **assumed** relation between to variables $Y$ and $X$. Often we also **assume** a diection of the relation ($X \rightarrow Y$) But there is a lot of uncertainty about that relation. There may or may not be a relation, the relation might look very different from your assumption, and so on. Equally important: there are often many more determinants of $Y$.  
+
+The main parts of this mode of thinking are:
+
+1. The universe is **deterministic**. Everything happens for reasons. Said differently, nothing in the universe is random.
+1. We do not know how the universe works. Even though we think the universe is completely deterministic, we do not know the mechanisms that the universe obeys to. As a consequence, things **look random**. *Randomness is thus not a property of the universe but a function of our knowledge of the world*.
+1. Whenever we look at data, we need to take our uncertainty (=lack of knowledge of the mechanisms at work) into account. We use randomness as a way of expressing this uncertainty because then we can use probability theory to help us make informed decisions under uncertainty. 
+
+This can probably best be explained by examples. 
+
+## The probability of a coin toss is 50%
+
+When you throw a coin in the air a hundred times, how many times does it land heads and how many times tail? You probably have some sort of notion that it should be roughly equal but it will not be completely 50 / 50. Let's discuss why you have that notion and what's not quite correct about it.
+
+If we would simulate this sequence of coin tosses, we would just draw 100 times from an urn with equal proportions of "head" and "tails" balls:
+
+```{r}
+coin_tosses <- table(rbinom(n=100, size=1, prob=c(0.5,0.5)))
+barplot(coin_tosses, names.arg=c("Heads", "Tails"))
+```
+
+A few things to note. First  
+
+## Drawing inference from data
+
+Let's use a typical text book question: "What are the returns to schooling?" How much more in wages do you get if you invest into additional education? It is one of the most important labor economics questions because it is another way to frame the question: "how important is education?" with obvious political and regulatory implications. 
+
+Now, below I give you a dataset with wage data. It contains the following variables
+
+    wage:: monthly wage in $100
+    education:: years of education
+    parent_education:: years of education of the least educated parent
+    school:: a code for the high school visited
+
+Let's look at the data:
+
+```{r}
+wages_data <- read.csv("../data/wage_sample1.csv")
+par(mfrow=c(1,2))  # set graphics options to 1 row and 2 columns
+cblue <- rgb(0.2, 0.3, 0.4, 0.9)  # define a color
+hist(wages_data$education, 
+     breaks=20,  # group datarange into 20 bins
+     col=cblue,  # fill color of the bars
+     border=NA,  # no border color for the bars
+     main=""  # no title above the plot
+     )
+hist(wages_data$wage, breaks=20, col=cblue, main="")
+```
+
+We could run a simple regression to estimate the relation between wages and education Something like:
+
+```{r}
+ablue <- rgb(0.2, 0.3, 0.4, 0.2)
+plot(x=wages_data$education, y=wages_data$wage,
+     col=ablue,  # last number is the alpha (0.2)
+     pch=20,  # plotting ‘character’. 20 is solid bullet
+     cex=2  # character (or symbol) expansion. Size of the symbol
+     )
+reg1 <- lm(wage~education, data=wages_data) 
+abline(reg1, lwd=1.8, col=cblue)
+```
+
+
+
+```{r}
+wages_data2 <- read.csv("../data/wage_sample2.csv")
+wages_data3 <- read.csv("../data/wage_sample3.csv")
+reg2 <- lm(wage~education, data=wages_data2) 
+reg3 <- lm(wage~education, data=wages_data3) 
+```
+
+
+Let's compare the newly collected datasets. 
+
+
+```{r}
+par(mfrow=c(3,5),  # 3 rows, 2 columns
+    mar=c(4,2,2,2)  # slightly adjust margins
+    )
+draw_hist_row <- function(data, color, nbreaks=20) {
+   with(data, hist(education, main="", breaks=nbreaks, col=color))
+   with(data, hist(parent_education, main="", breaks=nbreaks, col=color))
+   with(data, hist(school, main="", breaks=nbreaks, col=color))
+   tab_occ <- table(data[, "occupation"])
+   barplot(tab_occ, main="", col=color)
+   with(data, hist(wage, main="", breaks=nbreaks, col=color))
+}
+draw_hist_row(data=wages_data, color=cblue)
+draw_hist_row(data=wages_data2, color="red")
+draw_hist_row(data=wages_data3, color="green")
+```
+
+As you can see, the survey service took great pains to get as close to collecting the same sample as possible. The plots show that people with exactly equal characteristics were interviewed. However, wage, while showing a similar distribution differs. Why? Because, in addition to the observed variables (education, parent_education, school, and occupation) the wage is probably determined by tons of other things that we have did not measure. So, even if we would collect hundred more samples with the same observables, we will always get a slightly different wage distribution. Because there are a few things that we did not know could matter, or could not measure, or where to expensive to measure, etc. So we can never truly replicate a study. 
+
+Now, what does that imply? Well, if we estimate the relation, between education an wage, what will happen? Let's see:
+
+```{r}
+plot(x=wages_data$education, y=wages_data$wage,col=ablue, pch=20, cex=2)
+abline(reg1, lwd=1.8, col=cblue)
+points(x=wages_data2$education, y=wages_data2$wage,col=rgb(.9,.3,0.3, 0.2), pch=20, cex=2)
+abline(reg2, lwd=1.8, col="red")
+points(x=wages_data3$education, y=wages_data3$wage, col=rgb(.3,.9,0.3, 0.2), pch=20, cex=2)
+abline(reg3, lwd=1.8, col="green")
+```
+
+As you can see, the regression lines differ. Which one is the correct one? None of the three is. Why? Think about how wage is determined:
+
+
+$$wage_i = f\left(education_i, parent\_education_i, school\_quality_i, occupation\_wage\_level_i \right)+ u_i$$
+
+We *assume* that education, parent_education, school, and occupation matter. We don't know for sure and we don't quite know how either. Said differently, we don't know the functional form of $f(\cdot)$. And there are likely tons of things that also play a role like person $i$'s ability. Such additional determinants are captured in that $u_i$ term. It often called the *error term* but is really only a catch-all term for everything unmeasured. 
+
+So, going back to our free samples, all samples are likely equal in the $f\left(education_i, parent\_education_i, school\_quality_i, occupation\_wage\_level_i \right)$ part, but differ in the $u_i$ part! Frequentists statisticians think of this part as the "random part". **Taken together with our uncertainty about the true mechanism, that part that induces uncertainty in our estimates.** Because $u_i$ differs from sample to sample, it induces variation in estimates. This is a critical point that you should really strive to understand. 
+
+Imagin, a fully deterministic mechanism:
+
+$$y_i= 1 + 2 * x_i + 3*z_i -2 * v_i$$
+
+But you don't know that. You only guess that $y$ and $x$ are related, but you don't know that it is a linear relation, you don't know the effect of $x$ on $y$ is stable, with magnitude 2, and you don't know about $z$ and $v$. We might assume that the relation is of the general form: 
+
+$$y_i= a_0 + a_1 * x_i + u_i$$
+
+where $u_i = 3*z_i -2 * v_i$. We can fit this with a regression. 
+
+$$y_i= \hat{a}_0 + \hat{a}_1 * x_i + \hat{u}_i$$
+
+The regression tries to find an $\hat{a}_0$ and $\hat{a}_1$ that minimizes tries to explain as much as possible of $y$. That is simply another way of saying it minimizes the sum of of squared residuals $\hat{u}_i$. Let's simulate this case to make it more accessible.
+
+```{r}
+n <- 200
+x <- rnorm(n=n, mean=3, sd=1)
+z <- rnorm(n=n, mean=1, sd=1)
+v <- rnorm(n=n, mean=2, sd=1)
+y = 1 + 2 * x + 3 * z - 2 * v
+
+reg_ex <- lm(y~x)
+x_coeff <- coef(reg_ex)["x"]
+plot(x, y, pch=20, main=paste("a1:", x_coeff))
+abline(reg_ex)
+```
+
+You can see that the estimate $\hat{a}_1$ is not exactly equal $a_1=2$. This is because of all the unmeasured stuff ($v$ and $z$ in $u$) $v$ and $z$ affect $y$ as well and they will adjust y, so that the relation between $y$ and $x$ alone is not exactly $2$ if we try to explain as much of $y$ as we can with $x$!
+
+```{r}
+coef(lm(y~x + v+ z))
+```
+
+You see, if we put v and z into the equation, we get exactly the coefficients. There is no uncertainty left (Except for functional form. Here, we guessed the functional form -- linear, additive -- correct as well)
+
+# Quantifying Uncertainty
+
+## Sampling uncertainty
+
+We undertand now where uncertainty comes from and what randomness really means. When we have a research question and a sample that we want to use the sample to answer the research question, we face model uncertainty and the sample does never include all important determinants. In frequentist terms, we could make a thought experiment: what would happen to our estimates, if we could replicate our sample, with exactly the same measured, observable variable. Of course, we won't be able to replicate the unmeasured determinants, so our outcome variable will be different, leading to different estimates. **But, if we could do such replications, we can use that variation in estimates to measure uncertainty in estimates due to the variation in unmeasured variables**. This is again something we can simulate:
+
+We keep the same $x$. Because we draw 1000 different $z$ and $v$ and recompute $y$.
+
+
+```{r}
+reps <- 1000
+a1_sim <- vector(mode="numeric", length=reps)
+for (i in 1:reps){
+  z <- rnorm(n=n, mean=1, sd=1)
+  v <- rnorm(n=n, mean=2, sd=1)
+  y = 1 + 2 * x + 3 * z - 2 * v
+  a1_sim[i] <- coef(lm(y~x))["x"]
+}
+hist(a1_sim, breaks=100, main="", xlab="Estimates of a1", col=cblue)
+abline(v=2,col="red")
+```
+
+This variation tells us how much uncertainty we have in our estimate. Only our situation is usually:
+
+- we don't know that $a_1$ is actually 2
+- we only have one sample
+- we do not know whether the assumed functional form (linear, additive) is even correct
+
+We cannot easily incorporate the last point. An often overlooked caveat is that everything we will discuss in a bit (standard errors, p-values, etc.) is conditional on us correctly guessing the overall functional form. 
+
+## From simulations to standard errors
+
+Now, what's left is to quantify this idea. Remember that the idea of expressing uncertainty about our estimates as a thought experiment of "How would my estimate vary, if I could draw a million samples?" is pure fiction! It is an epistimological crutch. You always only observe one sample and need draw inferences on one sample alone. With sufficient assumptions however, we can *estimate* how much our estimates would vary *if we could replicate our sample a million times*. We will discuss this in the next section on regression basics.
+
+
+# Excercises
+
+1. Simulation. Try to set up your own fake data, simulate it, run regressions and see how your coefficient of interest varies. This will not only give you a better feeling for where the variation comes from, but also help you get familiar with R. Set up the simulation so that you can change:
+    - The number of unmeasured determinants in the error term.
+    - The amount of unmeasured error
+    - The true functional form and the assumed functional form. 
+
+2. Please open the dataset "Nutrition_Physical_Activity_and_Obesity.csv" and start exploring it. In particular:
+    - What data is in it?
+    - is this dataset in a state that you can do easy inference on?
+    - filter and transform the data so as to be useful for analysis
+    - explore the noisiness of the data.
+
+
+# References
