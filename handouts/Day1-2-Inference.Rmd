@@ -10,9 +10,7 @@ output:
     toc: yes
 ---
 
-```{r}
-# imports
-```
+In the previous part we discussed that we are often mostly interested how average outcomes change going from one group of observations to another. But, we have not yet really discussed why we are interested in averages in the first place. That question leads to a host of inference problems and is the focus of this part.
 
 # Thinking about Causality and How We use Probability
 
@@ -20,7 +18,7 @@ output:
 
 > Our goal is to understand the behavioral process that leads to the agent’s choice. We take a causal perspective. There are factors that collectively determine, or cause, the agent’s choice. Some of these factors are observed by the researcher and some are not. The observed factors are labeled $x$, and the unobserved factors $\epsilon$. The factors relate to the agent’s choice through a function $y = h(x, \epsilon)$. This function is called the behavioral process. It is deterministic in the sense that given $x$ and $\epsilon$, the choice of the agent is fully determined. Since $\epsilon$ is not observed, the agent’s choice is not deterministic and cannot be predicted exactly. Instead, the probability of any particular outcome is derived. [@Train.2009, p.3]
 
-The above quote sums up the key perspective that is necessary to understand statistical infererence, which is the main mode of thinking when you are an empiricist. You can think of an empirical study as an attempt to estimate an **assumed** relation between to variables $Y$ and $X$. Often we also **assume** a diection of the relation ($X \rightarrow Y$) But there is a lot of uncertainty about that relation. There may or may not be a relation, the relation might look very different from your assumption, and so on. Equally important: there are often many more determinants of $Y$.  
+The above quote sums up the key perspective that is necessary to understand statistical infererence, which is the main mode of thinking when you are an empiricist. You can think of an empirical study as an attempt to estimate an **assumed** relation between to variables $Y$ and $X$. Often we also **assume** a diection of the relation ($X \rightarrow Y$) But there is a lot of uncertainty about that relation. There may or may not be a relation, the relation might look very different from your assumption, and so on. And most importantly: there are often many more determinants of $Y$.  
 
 The main parts of this mode of thinking are:
 
@@ -28,11 +26,29 @@ The main parts of this mode of thinking are:
 1. We do not know how the universe works. Even though we think the universe is completely deterministic, we do not know the mechanisms that the universe obeys to. As a consequence, things **look random**. *Randomness is thus not a property of the universe but a function of our knowledge of the world*.
 1. Whenever we look at data, we need to take our uncertainty (=lack of knowledge of the mechanisms at work) into account. We use randomness as a way of expressing this uncertainty because then we can use probability theory to help us make informed decisions under uncertainty. 
 
-This can probably best be explained by examples. 
+Because of all the unmeasured influences, there will always be variation. Remember the example from the first part:
+
+```{r}
+set.seed(123)  # fix the random number generator
+age_range <- 16:24
+age <- sample(x=age_range, size=100, replace=TRUE)  # draw 100 integers randomly
+y <- 2 + 3 * age - 0.5*age^2 + rnorm(100, 0, 20)  # create a new variable y as linear additive function of x
+plot(age, y,  # plot x vs y (draws points by default)
+     col=rgb(0.2, 0.3, 0.4, 0.3),  # color of the points
+     pch=16,  # point character, 16 is a small dot
+     xlab="Subpopulations defined by different values of 'age'",
+     ylab="Outcome")  
+y_ticks <- 2 + 3 * age_range - 0.5 * age_range^2
+points(age_range, y_ticks, col="red", pch=20)  # adds the average y in red for evey ticks value
+```
+
+Even, though this is simulated, this illustrates the main problem. Suppose for instance the outcome is some kind of happines index and you get this picture: happiness seems to go down with age. But there is variation around the average. Where would such variation come from? From the myriad other things that influence happiness in addition to age. This is also the reason, we are interested in average effects. We want to know how things change on average as $x$ varies, knowing full well that the outcome depends on tons of other things as well. Sometimes you hear this in workshops: "But does your variable of interest not depend on so many other things?" What is usually behind that question is that the asking person does not believe $x$ to be an important enough variable that would meaningfully shift the average without taking into account many contextual factors. We will talk about how to handle such things in later parts.  
+
+Let's first look at some examples and try to better understand the influence of unmeasured determinants. 
 
 ## The probability of a coin toss is 50%
 
-When you throw a coin in the air a hundred times, how many times does it land heads and how many times tail? You probably have some sort of notion that it should be roughly equal but it will not be completely 50 / 50. Let's discuss why you have that notion and what's not quite correct about it.
+When you throw a coin in the air a hundred times, how many times does it land heads and how many times tail? You probably have some sort of notion that it should be roughly equal. But it will not be completely 50 / 50. Let's discuss why you have that notion and what's not quite correct about it.
 
 If we would simulate this sequence of coin tosses, we would just draw 100 times from an urn with equal proportions of "head" and "tails" balls:
 
@@ -41,7 +57,7 @@ coin_tosses <- table(rbinom(n=100, size=1, prob=c(0.5,0.5)))
 barplot(coin_tosses, names.arg=c("Heads", "Tails"))
 ```
 
-A few things to note. First  
+But when we did this, notice that we have not used any information on the coin tosses. If we would actually perform these tosses and we could measure wind, throwing angle, speed of rotation, etc. we might actually be able to predict quite well how the coin will land. The 50%/50% probability is really a randomnes that orginiates from us not measuring all the determinants of the coin toss. The more we would measure those, the less "random" the coin tosses would be. 
 
 ## Drawing inference from data
 
@@ -60,12 +76,14 @@ Let's look at the data:
 wages_data <- read.csv("../data/wage_sample1.csv")
 par(mfrow=c(1,2))  # set graphics options to 1 row and 2 columns
 cblue <- rgb(0.2, 0.3, 0.4, 0.9)  # define a color
+# 1st histogram
 hist(wages_data$education, 
      breaks=20,  # group datarange into 20 bins
      col=cblue,  # fill color of the bars
      border=NA,  # no border color for the bars
      main=""  # no title above the plot
      )
+# 2nd histogram
 hist(wages_data$wage, breaks=20, col=cblue, main="")
 ```
 
@@ -83,6 +101,7 @@ abline(reg1, lwd=1.8, col=cblue)
 ```
 
 
+Now, assume that we were able to go into the field and collect new data twice. We didn't find the same people, but we found people with exactly the same characteristics as the ones found in the first sample.
 
 ```{r}
 wages_data2 <- read.csv("../data/wage_sample2.csv")
@@ -146,9 +165,10 @@ where $u_i = 3*z_i -2 * v_i$. We can fit this with a regression.
 
 $$y_i= \hat{a}_0 + \hat{a}_1 * x_i + \hat{u}_i$$
 
-The regression tries to find an $\hat{a}_0$ and $\hat{a}_1$ that minimizes tries to explain as much as possible of $y$. That is simply another way of saying it minimizes the sum of of squared residuals $\hat{u}_i$. Let's simulate this case to make it more accessible.
+The regression tries to find an $\hat{a}_0$ and $\hat{a}_1$ that minimizes tries to explain as much as possible of $y$. That is simply another way of saying it minimizes the sum of of squared residuals $\hat{u}_i$. Or that it estimates the conditional expectation. How the average $y$ changes with changes in $x$. Let's simulate this case to make it more accessible.
 
 ```{r}
+set.seed(9870137)
 n <- 200
 x <- rnorm(n=n, mean=3, sd=1)
 z <- rnorm(n=n, mean=1, sd=1)
@@ -161,13 +181,17 @@ plot(x, y, pch=20, main=paste("a1:", x_coeff))
 abline(reg_ex)
 ```
 
-You can see that the estimate $\hat{a}_1$ is not exactly equal $a_1=2$. This is because of all the unmeasured stuff ($v$ and $z$ in $u$) $v$ and $z$ affect $y$ as well and they will adjust y, so that the relation between $y$ and $x$ alone is not exactly $2$ if we try to explain as much of $y$ as we can with $x$!
+You can see that the estimate $\hat{a}_1$ is not exactly equal $a_1=2$. Since we simulated this, we know the average of $y$ changes its magnitude by 2, as we changes $x$ by one unit. However, our estimate is only 1.77. Why? This is because of all the unmeasured stuff ($v$ and $z$ in $u$). $v$ and $z$ affect $y$, but since we did not measure them, their effect is "random". That random interference makes the estimated relation between $y$ and $x$ differ from $2$, if we try to explain as much of $y$ as we can with $x$!
+
+If we would control the effects of these two variables in a multivariate regression, we would not have that problem
 
 ```{r}
-coef(lm(y~x + v+ z))
+coef(lm(y ~ x + v + z))
 ```
 
 You see, if we put v and z into the equation, we get exactly the coefficients. There is no uncertainty left (Except for functional form. Here, we guessed the functional form -- linear, additive -- correct as well)
+
+
 
 # Quantifying Uncertainty
 
