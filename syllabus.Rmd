@@ -58,6 +58,7 @@ This course is intended to teach you the three key pillars of econometrics: Iden
 1. see the connections between all discussed approaches: how they offer different ways of exploiting variation in the data based on what you assume about the underlying data,
 1. have gained enough econometric understanding to not shy aways form approaching advanced topics on your own.
 
+
 # Required Software
 
 All of the course will be taught in R. You will be given code and learn how to implement all the covered topics in R. The course handouts will be R-Notebooks (In fact the course syllabus is compiled from a R-Markdown document). So please, bring a laptop with the newest [R version](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) installed to each class. Both is free software, which is part of the reason why I chose to hold the course in R. The other is that R and Python have taken the data and scientific community [by storm](http://r4stats.com/2017/02/28/r-passes-sas/) during the last few years and you will likely need to know both in the future. Try to play around with R a bit before the course starts. Part of the course will be to teach you R. But it helps immensely if you try to find your way around before. In particular, figure out how to install additional packages from within RStudio (check for instance [R for Data Science](http://r4ds.had.co.nz/)) and install the following packages:
@@ -66,12 +67,16 @@ All of the course will be taught in R. You will be given code and learn how to i
 - lfe
 - haven
 - igraph
+- gridExtra
+- scatterplot3d
 - *(list will be updated)*
 
 
 # Reading
 
-On a few days, I will post after-class reading. The reading will typically consist of well-written, short review articles or great exemplary empirical studies that will help repeating and understanding the material we covered. Below, please find a list of recommended text books. You don't have to read these. But I encourage you to have access to at least the first two in case you want to check up on material. And if you do empirical work later on, you definitely want to have some of them ready at hand. *(Note that Gelman and Hill are significantly revising their book at the moment. A new version is expected some time in 2018)*
+On a few days, I will post after-class reading. The reading will typically consist of well-written, short review articles or great exemplary empirical studies that will help repeating and understanding the material we covered. Below, please find a list of recommended text books. You don't have to read these if you can follow along just fine with just the handouts. But I encourage you to have access to at least the first two in case you want to check up on material. In a lot of cases, I will refer to the textbooks for proofs and further information. And if you do empirical work later on, you definitely want to have some of them ready at hand. *(Note that Gelman and Hill are significantly revising their book at the moment. A new version is expected some time in 2018)*
+
+We will make heavy use of R Notebooks. This will be my first time trying them out as teaching tool. My idea is to have them be a type of interactive handout/slides crossbreed. This will give you the opportunity to try out the graphs and analysis that you will see in class and adjust the handouts in any way that helps you better remember the stuff. And hopefully it will help you learn R on the way too. Let's see how well this goes.
 
 ## Great Textbooks
 
