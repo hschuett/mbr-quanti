@@ -281,9 +281,14 @@ So that probability is roughly 97.5% and the probability of seeing a value of 2 
 
 # Asymptotics
 
-For a lot of more complicated situations, where we need different assumptions and get different $se(\hat{\beta})$ estimators for example, it quickly becomes impossible to figure out the shape of the distribution of $t_{\hat{\beta}} = \frac{\hat{\beta}-\beta_0}{se(\hat{\beta})}\sim t_{n-k}$ is. In such cases one can often still make an argument what that distribution looks like if the sample becomes big. Because very often much of the randomness becomes closer and closer to a normally distributed randomm variable as the sample grows. In such cases, we can develop asymptotic tests. For example, see @Wooldridge.2010 p.53 für asymptotic normality
+For a lot of more complicated situations, where we need different assumptions and get different $se(\hat{\beta})$ estimators for example, it quickly becomes impossible to figure out the shape of the distribution of $t_{\hat{\beta}} = \frac{\hat{\beta}-\beta_0}{se(\hat{\beta})}\sim t_{n-k}$ is. In such cases one can often still make an argument what that distribution looks like if the sample becomes big. Because very often much of the randomness becomes closer and closer to a normally distributed random variable as the sample grows. In such cases, we can develop asymptotic tests. For example, see @Wooldridge.2010 p.53 für asymptotic normality. The central assumptions here are:
 
+1. Random sampling 
+1. Population orthogonality assumption  $E[x'u]=0$
+1. rank E(x'x) = K (which means no perfect colinearity)
+1. $E[uu'|X] = \sigma^2I$ (homoscedasticity)
 
+Most of the problems here are finding asymptotically converging distributions for the cases where we don't want to assume homoscedasticity. Which is basically consistent with assuming that there are unmeasured influences left, but we have some idea about how the affect the behavior of the error term. We will talk more about that in a later session.
 
 # Examples
 
