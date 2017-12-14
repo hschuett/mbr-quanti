@@ -51,24 +51,25 @@ myopts <- BibOptions(bib.style = "authoryear", style="latex", first.inits=FALSE,
 
 ![The many headaches of an empirical analysis](figures/fig-syllabus.pdf)
 
-This course is intended to teach you the three key pillars of econometrics: Identification (what can be learned in principle?), Estimation (how best to learn it?), Inference (how certain can we be in what we learned?). We will start with linear regression and work our way up to extensions such as fixed effects estimators, and Difference-in-Difference estimators. We'll switch to matching estimators and highlight its link to normal regression analysis, then spend quite some time on instrumental variables and similar approaches to causal inference. We will expand the linear regression framework to so called "general linear models" in order to analyze ordinal and nominal variables (e.g., logistic regression). If time permits, the course will end with a glance at the advanced topics of General Method of Moments, Bayesian Statistics, and Shrinkage. Throughout the course, the focus will be to develop a solid understanding of the key statistical concepts and tools, underlying modern empirical thinking: Identifcation and inference in the presence of uncertainty, potential outcomes, and graph theory. My hope is that if you grasp these you will: 
+This course is intended to teach you the three key pillars of econometrics: Identification (what can be learned in principle?), Estimation (how best to learn it?), Inference (how certain can we be in what we learned?). We will start with linear regression and work our way up to extensions such as fixed effects estimators, and Difference-in-Difference estimators. We'll switch to matching estimators and highlight its link to normal regression analysis, then spend quite some time on instrumental variables and similar approaches to causal inference. We will expand the linear regression framework to so called "general linear models" in order to analyze ordinal and nominal variables (e.g., logistic regression). If time permits, the course will end with a glance at the advanced topics of General Method of Moments, Bayesian Statistics, and Shrinkage. Throughout the course, the focus will be to develop a solid understanding of the key statistical concepts and tools, underlying modern empirical thinking: Identification and inference in the presence of uncertainty, potential outcomes, and graph theory. My hope is that if you grasp these you will: 
 
-1. be able to structure testable hypotheses and classify each challenge of testing those hypotheses as one of the three basic identification problems: confounding bias, endogenenous selection bias, and overcontrol bias.
+1. be able to structure testable hypotheses and classify each challenge of testing those hypotheses as one of the three basic identification problems: confounding bias, endogenous selection bias, and over-control bias.
 1. have a clear idea how to setup up an empirical test (e.g., what estimator to choose, which variables to include, which **not** to include),
 1. see the connections between all discussed approaches: how they offer different ways of exploiting variation in the data based on what you assume about the underlying data,
-1. have gained enough econometric understanding to not shy aways form approaching advanced topics on your own.
+1. have gained enough econometric understanding to not shy always form approaching advanced topics on your own.
 
 
 # Required Software
 
-All of the course will be taught in R. You will be given code and learn how to implement all the covered topics in R. The course handouts will be R-Notebooks (In fact the course syllabus is compiled from a R-Markdown document). So please, bring a laptop with the newest [R version](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) installed to each class. Both is free software, which is part of the reason why I chose to hold the course in R. The other is that R and Python have taken the data and scientific community [by storm](http://r4stats.com/2017/02/28/r-passes-sas/) during the last few years and you will likely need to know both in the future. Try to play around with R a bit before the course starts. Part of the course will be to teach you R. But it helps immensely if you try to find your way around before. In particular, figure out how to install additional packages from within RStudio (check for instance [R for Data Science](http://r4ds.had.co.nz/)) and install the following packages:
+All of the course will be taught in R. You will be given code and learn how to implement all the covered topics in R. The course handouts will be R-Notebooks (In fact the course syllabus is compiled from a R-Markdown document). So please, bring a laptop with the newest [R version](https://www.r-project.org/) and [RStudio](https://www.rstudio.com/) installed to each class. Both is free software, which is part of the reason why I chose to hold the course in R. The other is that R and Python have taken the data and scientific community [by storm](http://r4stats.com/2017/02/28/r-passes-sas/) during the last few years and you will likely need to know both in the future. Try to play around with R a bit before the course starts. Part of the course will be to teach you R. But it helps immensely if you try to find your way around before. In particular, figure out how to install additional packages from within R Studio (check for instance [R for Data Science](http://r4ds.had.co.nz/)) and install the following packages:
 
 - tidyverse
 - lfe
-- haven
+- haven (for loading stata, sas datasets)
 - igraph
 - gridExtra
 - scatterplot3d
+- MatchIt
 - *(list will be updated)*
 
 
@@ -81,7 +82,7 @@ We will make heavy use of R Notebooks. This will be my first time trying them ou
 ## Great Textbooks
 
 ```{r, echo = FALSE, results="asis"} 
-bib[1:3]
+bib[1:4]
 ``` 
 
 ## Great Additional Reading
@@ -115,7 +116,7 @@ You can always write me an e-mail; I am usually quick to respond. If you have lo
 ### Part 1: Statistical Basics
 
 - Introduction to econometric and statistical thinking
-- The goal of most of scientific analyis: inference (vs. say prediction)
+- The goal of most of scientific analysis: inference (vs. say prediction)
 - Identification as a population concept versus inferring from samples
 - Intro to graph theory
 
@@ -137,8 +138,7 @@ You can always write me an e-mail; I am usually quick to respond. If you have lo
 
 - How to structure an empirical test using the potential outcomes and causal diagram frameworks
 - Confounders, endogeneity, and correlated omitted variable bias
-- The three basic identification problems: confounding bias, endogenenous selec-
-tion bias, and overcontrol bias
+- The three basic identification problems: confounding bias, endogenous selection bias, and over-control bias
 
 *Excercise part: Simulation and real data excercises to understand causes of consequences of confounding variables*
 
@@ -146,12 +146,12 @@ tion bias, and overcontrol bias
 ### Part 2: Regession Analysis II
 
 - Regression model properties in the presence of confounders.
-- Posttreatment and Pretreatment variables.
-- The problem with controlling for posttreatment variables.
+- Post-treatment and Pre-treatment variables.
+- The problem with controlling for post-treatment variables.
 - How to design a regression test. How not to test for mediation.
 - What variables to include and which **not** to include.
 
-*Excercise part: simulations + replicating a study.*
+*Excercise part: simulations*
 
 **After-class Reading:**
 
@@ -174,7 +174,7 @@ bib["Elwert.2014"]
 ### Part 2: Potential Outcomes and Control Groups
 
 - The potential outcomes framework
-- Selection-on-obervables via matching
+- Selection-on-observables via matching
 - Modern matching procedures
 - Comparison to linear regression
 - Synthetic control groups
@@ -226,7 +226,7 @@ bib["Elwert.2014"]
 - Logit and Probit models.
 - Complications when interpreting Logit and Probit coefficients.
 - Poisson Regression.
-- Overdispersion.
+- Over-dispersion.
 
 *Excercise part: tba.*
 
