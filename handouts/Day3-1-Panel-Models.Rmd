@@ -1,0 +1,149 @@
+---
+title: "Quantitative Methods -- Day 2: Other Regression Issues"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+
+```{r}
+library(lfe)
+library(dplyr)
+```
+
+# The problem
+
+As you have realized by now, a key problem in social sciences is unobserved influences that are correlated with our variable of interest. For example, the 
+
+Sometimes we have panel data (or sometimes called longitudinal data): Data that has a time dimension. For example, firm observations for multiple years. In this case, we can get rid of some unobserved correlated influences if the unobserved influence has a certain form. The necessary for is that the correlated unobserved influence is invariant across one of the panel dimensions. For instance, if one where to measure the same students across multiple school years, their ability should not vary over the years (in contrast to their education, hopefully).
+
+Imagine the following form: 
+
+$$y_{i,t} = X_{i,t}\beta + c_i + u_{i,t}$$
+where $c_i$ does not have a time dimension. These are individual $i$ specific influences on $y$. If we cannot measure all the things in $c_i$ they would end up in the error term. And if they are correlated with $X$, then we have a correlated omitted variable problem. 
+
+In such a setting, where we have data across both time $t$ and individuals $i$ we can adress this issue. If we are willing to discard information. Imagine averaging all your data for each individual:
+
+$$\bar{y}_{i} = \bar{X}_{i}\beta + c_i + \bar{u}_{i}$$
+since $c_i$ does not vary over time, their average is just the $c_i$. If we now substract the average from the actual values, $c_i$ drops out of the equation:
+
+$$(y_{i,t}-\bar{y}_{i}) = (X_{i,t} -\bar{X}_{i})\beta + (c_i - c_i) + (u_{i,t} - \bar{u}_{i})$$
+
+As you can see, the $\beta$s of such a regression are the same as in the original, but the $c_i$ are gone. This is called a **Within-Estimator** or **Fixed-Effects Estimator**. It is called "within" because by averaging, we eliminate all variation between units $i$! All the variation that is left to be explained by $\beta$ is the variation across time "within" a unit $i$. Or said another way, if $i$ would be people, all time invariant things like gender would also be taken out and cannot be analyzed anymore. That is the price to pay for this estimation technique. 
+
+Of course, you can combine fixed effects. You can have time and firm fixed effects for example. 
+
+```{r}
+set.seed(999)
+d1 <- data.frame(individual = c(1,1,1,1,1,0,0,0,0,0),
+                 time = c(1,2,3,4,5,1,2,3,4,5),
+                 time_fe = c(2,5,1,2,0, 2,5,1,2,0),
+                 ind_fe = c(2,2,2,2,2,7,7,7,7,7),
+                 u = rnorm(10, mean=0, sd=3)
+                 )
+d1$x <- 1.3 * d1$ind_fe - 2 * d1$time_fe + rnorm(10, mean=1, sd=3)
+d1$y <- 2* d1$time_fe + d1$ind_fe + 2 * d1$x + d1$u
+
+cblue <- rgb(0.2, 0.3, 0.7 ,0.8)
+cred <-  rgb(0.7, 0.3, 0.2, 0.8)
+plot(x=d1$x, y=d1$y, 
+     pch=19, col=c(rep(cblue, 5), rep(cred, 5)))
+legend(x="bottomright", legend=c("Person 1","Person 2"), col=c(cblue, cred), pch=19)
+```
+
+Let's see what happens if we take out the mean across people and the mean across time:
+
+```{r}
+d2 <- d1 %>% 
+  group_by(individual) %>% 
+  mutate(av_y = mean(y),
+         av_x = mean(x)) %>% 
+  ungroup() %>% 
+  mutate(within_y = y - av_y,
+         within_x = x - av_x)
+par(mfrow=c(1,2))
+plot(x=d2$x, y=d2$y, 
+     pch=19, col=c(rep(cblue, 5), rep(cred, 5)))
+abline(h=2, col="blue")
+abline(h=7, col="red")
+plot(x=d2$within_x, y=d2$within_y, 
+     pch=19, col=c(rep(cblue, 5), rep(cred, 5)))
+```
+
+It looks like these plots are quite away from the individual means. That is because there is so much other stuff going on and that is simply the result of random noise. But once we take out the person specific mean, 
+on both $y$ and $x$ we get more mixture. 
+
+Let's take out the time component instead:
+
+```{r}
+d3 <- d1 %>% 
+  group_by(time) %>% 
+  mutate(av_y = mean(y),
+         av_x = mean(x)) %>% 
+  ungroup() %>% 
+  mutate(within_y = y - av_y,
+         within_x = x - av_x)
+par(mfrow=c(1,2))
+cgrays <- c("blue", "red", "gray", "green", "orange")
+plot(x=d3$x, y=d3$y, 
+     pch=19, col=c(cgrays, cgrays))
+abline(h=2, col="blue")
+abline(h=5, col="red")
+abline(h=1, col="gray")
+abline(h=2, col="green")
+abline(h=0, col="orange")
+plot(x=d3$within_x, y=d3$within_y, 
+     pch=19, col=c(cgrays, cgrays))
+```
+
+Funny, enough, after taking out the time trends on both $x$ and $y$ we can see what looks like person
+clusters.
+
+Let's take out both
+
+```{r}
+d4 <- d1 %>% 
+  group_by(time) %>% 
+  mutate(av_t_y = mean(y),
+         av_t_x = mean(x)) %>% 
+  ungroup() %>% 
+  group_by(individual) %>% 
+  mutate(av_i_y = mean(y),
+         av_i_x = mean(x)) %>% 
+  ungroup() %>% 
+  mutate(within_y = y - av_t_y - av_i_y,
+         within_x = x - av_t_x - av_i_x)
+par(mfrow=c(1,2))
+plot(x=d4$x, y=d4$y, 
+     pch=19, col=c(rep(cblue, 5), rep(cred, 5)))
+plot(x=d4$within_x, y=d4$within_y, 
+     pch=19, col=c(rep(cblue, 5), rep(cred, 5)))
+```
+
+```{r}
+summary(lm(y ~ x, data=d4))
+summary(felm(y ~ x | time + individual | 0 | 0, data=d4))
+```
+
+Btw. You do not want to estimate this yourself! Always use a software package for it. You can easily check that you get the coefficient correct but the standard errors all wrong:
+
+```{r}
+summary(lm(within_y ~ within_x, data=d4))
+```
+
+This is because, even though you cancelled the individual and time effects, they are in the averages you took took out. So the normal standard error estimator uses the wrong number of variables to calculate the degrees of freedom. 
+
+
+
+# Excercises
+
+1. Please load the aifares dataset and use it to explain the fare of a route. Use normal (pooled) OLS, then think about why a Fixed-Effects Estimator might help here. Then run a regression. Explain why you get certain results and certain errors.
+
+
+
+# References

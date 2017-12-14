@@ -1,0 +1,366 @@
+---
+title: "Quantitative Methods -- Day 3: Potential Outcomes and Matching Estimators"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+```{r}
+library(ggplot2)  # graphics
+library(haven)    # read stata files
+library(MatchIt)  # matching procedures
+```
+
+
+# Potential outcomes framework
+
+## Exchanging one set of assumptions for another
+
+To develop feasible identification strategies, econometric models typically assume a certain data generating process (DGP) for the outcome of interest. To do this properly, we need theory or prior knowledge about how outcomes are generated. An alternative approach, popular in statistics, is to not even require a DGP but instead assume fixed potential outcomes and place assumptions about how "treatments" are assigned to units [e.g., @Rosenbaum.2002]. This approach is often called the potential outcomes framework.
+
+## An example
+
+In many textbooks, the framework is often presented with a job training program example. We observe:
+
+- data on earnings $y_i$
+- whether an applicant to a job training program was offered a spot $d_i$
+- covariates $x_i$
+
+Let $y^1_i$ represent the earnings $i$ would get after having been offered a spot in the program and $y^0_i$ the earnings without the offer. Then the effect of the offer on $i$ would obviously be $\triangle_i = y^1_i -y^0_i$. But we can only observe one the two states. The so-called **fundamental problem of causal inference** [@Holland.1986] is that we never observe both $y^1_i$ and $y^0_i$ *for the same individual $i$. Instead, the **counterfactual outcomes** of individuals are "missing". This is often written as:
+
+$$y_i = d_iy^1_i + (1-d_i)y^0_i$$
+
+We only observe the treated values $y^1_i$ for the treated indiviudals (the $i$s that got offered the spot -- where $d_i=1$) and $y^0_i$ for the untreated individuals. We are missing $y^0_i$ for the treated $i$ and $y^1_i$ for the untreated $i$. A made-up example:
+
+```{r}
+data.frame(i=1:7,
+           y1=c(40, 100, 2, 80, 10, 40, 20),
+           y0=c(20, 70, 3, 140, 7, 30, 40),
+           d=c(1,0,1,0,1,1,0))
+```
+
+Only that we only observe one of these values per individual:
+
+```{r}
+data.frame(i=1:7,
+           y1=c(40, NA, 2, NA, 10, 40, NA),
+           y0=c(NA, 70, NA, 140, NA, NA, 40),
+           d=c(1,0,1,0,1,1,0))
+```
+
+In the potential outcomes framework, the goal is to somhow **impute** the missing values in this table. This is a very nice non-parametric way of thinking about the causal problem. It looks like we only need to know how people get assigned the treatment. The key is the assignment mechanism. 
+
+However, a few strong assumptions are already implicit in the original setup. For example, we need the so called Stable Unit Treatment Value Assumption (SUTVA) or else potential outcomes ($y^1_i$, $y^0_i$) are not well defined [@Rubin.1986]. SUTVA assumes:
+
+1. The treatment is homogenous (in some way). $Y^1_i$ needs to result whenever $i$ is treated (offered training) and $Y^0_i$ otherwise. This needs to be true regardless of the manner of treatment (how training is offered). Also the treatment needs be the same (or at least exchangeable) across units or else quantities like the average treatment effect are not really meaningful [@Rubin.1986]. 
+
+1. No interference across units. That is, individual i’s potential outcomes can’t be affected by the treatment assignment status of other individuals.
+
+As @Kline.2015 notes, such assumptions are strong and usually made explicit in structural models too. So there is less of a difference to other modes of thinking as one would first think. However, if we feel comfortable assuming SUTVA, the potential outcomes framework provides a parismonious way of talking Inference and Identifcation. 
+
+As argued before,  the missing outcomes are what we are interested in. You can even think of them as latent variables. Let's look at the simplest case and see how we can handle them. 
+
+## Missing at random
+
+When we say the outcomes are missing at random, we actually mean that the treatment $d_i$ is independent of the outcomes ($y^1_i$, $y^0_i$). This literature uses the $\perp$ sign to denote indepent relations. So can write missing at random as: 
+
+$$y^1, y^0\perp d$$
+
+
+When we write the problem in a regression framework, we get:
+
+$$y_i = d_iy^1_i + (1-d_i)y^0_i = y^0_i + (y^1_i-y^0_i)d_i$$
+ 
+But, while this migh highlight the treatement effect again ($\triangle_i = y^1_i -y^0_i$), it doesn't quite get us where we want yet. Let's make a proper regression out of it by expanding the right side of the equation:
+
+\begin{align}
+y_i &= y^0_i + (y^1_i-y^0_i)d_i\\
+    &= y^0_i + E[y^0_i] -E[y^0_i] + (y^1_i-y^0_i)d_i + E[(y^1_i-y^0_i)]d_i - E[(y^1_i-y^0_i)]d_i\\
+    &= E[y^0_i] + (y^0_i-E[y^0_i]) + E[(y^1_i-y^0_i)]d_i + ((y^1_i-y^0_i)- E[(y^1_i-y^0_i)])d_i\\
+    &= E[y^0_i] + E[(y^1_i-y^0_i)]d_i + \left[(y^0_i-E[y^0_i]) + ((y^1_i-y^0_i)- E[(y^1_i-y^0_i)])d_i\right]\\
+    &= E[y^0_i] + E[(y^1_i-y^0_i)]d_i + u_i\\
+    &= \beta_0 + \beta_1d_i + u_i\\
+\end{align}
+
+with $\beta_1 = E[(y^1_i-y^0_i)]$ and $E[(y^1_i-y^0_i)]$ called the **average treatement effect ATE**. The ATE is usually what we would really like to know. We can now check the usual $E[d_iu_i]=0$ to see whether the ATE is identified. Indeed with missing at random, it is (To show that remember that missing at random assumes  $d_i$ is independent of the outcomes ($y^1_i$, $y^0_i$). Then $E[y^*d_i]=E[y^*]E[d_i]$ and things cancel out)
+
+This is actually a powerful result. If outcomes are missing at random a difference of means will identify ATE *regardless of the underlying DGP*! This really illustrates the value of having a strong research design, such as a well designed experiment. This is the appeal of quasi-experimental designs such as regression discontinuity and quasi-natural experiments, that we will discuss later. 
+
+
+## Observational studies
+
+In an experiment, we can control the design process and try to aim for missingness at random. In an observational study, we do not have such control. Here treatments are observed rather than assigned. Missingness at randomness is of course extremly rare because of confounders. This problem is also often referred to in this literature as *imbalaced groups*. This simply means that there are systematic differences between the characteristics of the treatment group and the control group (the differ because treatment is correlated with one or more confounders) and those differences can affect the outcome (the confounders affect the outcome). In this parlance, you try to achieve balance between the groups by conditioning on the confounders. We have seen how to do this with a regression. Now, we want to talk about when this is reasonable and another way of doing this, which is popular within the potential outcomes framework. 
+
+## When is a regression a reasonable moddling approach for causal inference
+
+> The goal of matching is to reduce model dependence (Gary King)
+
+A simple regression is not always the best modelling approach for causal inference. Let's talk about why. The key problems are **lack of balance** and **lack of overlap**. Lack of balance is a problem because it forces us to rely more on the correctness of our model, which is something we would like to minimize as much as we can. Lack of overlap simply means that the range of data is not the same for treatment and control group. For the regions where there is no overlap we do not have approximations of the counterfactual and thus need to extrapolate (questions external validity). 
+
+
+### Lack of balance
+
+From @Gelman.2007, p. 200: suppose the potential outcomes are of the form:
+
+$$y^1_i = b_0 + b_1 x_i + b_2 x_i^2 + \theta + u_i$$
+$$y^0_i = b_0 + b_1 x_i + b_2 x_i^2  + u_i$$
+
+Averaging both equations, solving the second equation for $b_0$ and plugging that result into the first equation yields:
+
+$$\hat{\theta} = \bar{y}_1 - \bar{y}_0 - b_1(\bar{x}_1-\bar{x}_0) - b_2(\bar{x}^2_1 - \bar{x}^2_0)$$
+So, if we use a linear regression but do not include a quadratic term, then our estimate of the ATE will be off by $b_2(\bar{x}^2_1 - \bar{x}^2_0)$. That term will be bigger, the more different $\bar{x}$ is between treatment and control group. So lack of balance really is a problem of having to put a lot of faith into your modelspecification.
+
+So, imbalance is the source of model dependence, which leads to research discretion etc. 
+
+```{r}
+set.seed(666)
+x_0  <- rnorm(n=20, mean=2,   sd=1)
+y_0  <- rnorm(n=20, mean=4,   sd=2)
+x_1b <- rnorm(n=20, mean=2,   sd=1.5)
+y_1b <- rnorm(n=20, mean=4,   sd=1.5) 
+x_1a <- rnorm(n=20, mean=0,   sd=1)
+y_1a <- rnorm(n=20, mean=1,   sd=1) 
+x_1c <- rnorm(n=20, mean=4,   sd=1)
+y_1c <- rnorm(n=20, mean=1,   sd=1) 
+
+imba <- data.frame(y = c(y_0, y_1a, y_1b, y_1c),
+                   x = c(x_0, x_1a, x_1b, x_1c),
+                   treat = factor(c(rep(1, times=20), rep(0, times=60)))
+                   )
+sub_imba <- data.frame(y = c(y_0, y_1b),
+                       x = c(x_0, x_1b),
+                       treat = factor(c(rep(1, times=20), rep(0, times=20)))
+                       )
+
+base_plot <- ggplot(data=imba, aes(x=x, y=y)) +
+  geom_point(aes(color=treat)) +
+  theme(legend.position="bottom")
+
+gridExtra::grid.arrange(base_plot + geom_smooth(method="lm", aes(color=treat)),
+                        base_plot + geom_smooth(method="lm", formula=y ~ poly(x, 2), aes(color=treat)),
+                        ncol=2)
+```
+
+
+```{r}
+base_plot2 <- ggplot(data=sub_imba, aes(x=x, y=y)) +
+  geom_point(aes(color=treat)) +
+  theme(legend.position="bottom")
+
+gridExtra::grid.arrange(base_plot2 + geom_smooth(method="lm", aes(color=treat)),
+                        base_plot2 + geom_smooth(method="lm", formula=y ~ poly(x, 2), aes(color=treat)),
+                        ncol=2)
+```
+
+
+
+### Lack of overlap
+
+Following @Gelman.2007, p. 184, consider a hypothetical example of a medical treatment that is supposed to make you healthier. But you obviously had a pre-treatment health status. And that pre-treatment health status might determine whether you get the medical treatement or not. Now, in that case we might not have treatment observations for people with good pre-treatment health. Arguably we cannot say anything about the effect of treatment for good health people then (unless we are willing to extrapolate from bad health people)
+
+Another example. Not a very good example, but let's look that kid's score on an IQ test and label as "treatment" whether the mother went to high school or not. Let's compare in this dataset from [Gelman and Hill](http://www.stat.columbia.edu/~gelman/arm/examples/) what the overalp with regard to other covariates is:
+
+```{r}
+child_iq <- read_dta("../data/kidiq.dta")
+head(child_iq)
+```
+
+Let's check the distribution of covariates for treatment and control using ggplot2
+
+```{r}
+ggplot(data=child_iq, aes(x=mom_hs, y=kid_score)) +
+  geom_point(position="jitter") +  # draws the points and "jitters them"
+  geom_smooth(method="lm") +  # adds a regression line
+  theme_minimal()  # changes the default theme
+```
+
+```{r}
+ggplot(data=child_iq, aes(x=mom_iq, group=mom_hs, fill=factor(mom_hs))) +
+  geom_histogram(position="dodge", bins=25) +
+  labs(title="Distirbution of Mother IQ") +
+  theme_minimal()
+```
+
+In terms of overlap, we must be careful what we extrapolate the high-school impact to be for "smarter" mothers. (Notice also the imbalance) You can also see it a bit in this adjusted plot:
+
+```{r}
+ggplot(data=child_iq, aes(x=mom_hs, y=kid_score)) +
+  geom_jitter(width=0.25, height=0, aes(color=factor(dplyr::ntile(mom_iq, 9)))) +  # draws the points and "jitters them"
+  scale_color_brewer(type="seq", palette="Reds") +
+  geom_smooth(method="lm", se=F) +  # adds a regression line
+  theme_minimal()  # changes the default theme
+```
+
+Note that imbalance and overlap are different concepts. The first is about differing shapes of the covariate distribution, even if they have the same data range. Overlap only concerns overlap of the data ranges.
+
+# Matching
+
+> *Matching* refers to a variety of procedures that restrict and reorganize the original sample in preparation for statistical analyis [@Gelman.2007, p.206]
+
+In a sense, matching tries to select and trim the sample so that we restrict ourselfs to a subset of the data with balance and overlap by throwing away observations without matches. The advantage, if done correctly, is that we be more confident in the unbiasedness of our estimates for the subregion of data we matched. The downside is that we are throwing away data, which is inefficient, and we cannot in good confidence say much about the treatment effect outside the matched datarange. 
+
+## Selection on observables
+
+Let's say the outcomes are not missing at random, but whether they miss or not depends on some covariates. If we know those covariates however and can control for it, we still say "missing at random after conditional on the covariates". The so called **conditional independence assumption CIA** is also sometimes called **unconfoundedness** assumption, **ignorable treatment assumption**, or **selection on observables**. It has the form:
+
+$$y^1, y^0\perp d|X$$
+
+where, $X$ is all covariates. It bascially means the treatment assignment is exogenous conditional on covariates. And if the treatment is exogeneous it is quasi random and so is which outcome is missing. Another way of saying this is the distribution of potential outcomes is the same for different levels of treatment $d$ conditional on $X$. In this case, after conditioning on $X$ causal inferences can be mande without modelling the assignment process.
+
+Matching is one way of conditioning on covariates. A classic example [e.g., used in @Angrist.2008] is @Angrist.1998, who used matching to examine the effects of voluntary military service on the later earnings of soldiers. The military uses certain characteristics (age, schooling, test scores, etc.) to select soldiers and those characteristics might also have an effect on outcomes. But if we know all those characteristics and can find one person with those characteristics that got selected for service and one person with such characteristics that did do military service. If we compare the outcomes of those two groups then veteran status is as good as randomly assigned and the outcomes (later earnings) logically independent of the treatment (military service).
+
+If you pay close attention, you realize that the rationale for matching is actually pretty much the same as putting control variables into a regression. In fact, both matching and multivariate regressions are two ways of controlling for selection on observables. We will see later that, depending on what matching method is used, they mainly differ in assumptions about functional form. 
+
+## Example
+
+Let's try the simplest form. One-to-One matching.
+
+```{r}
+set.seed(666)
+# creating some random data
+n <- 100
+first_group <- data.frame(
+  age=sample(c(16:30), size=n, replace=TRUE),
+  schooling=sample(c(8:18), size=n, replace=TRUE),
+  score=sample(c(1:100), size=n, replace=TRUE),
+  u = rnorm(n=n, mean=0, sd=5)
+)
+first_group$military <- with(first_group, ifelse(age < 24 & schooling < 12 & score > 40, 1, 0))
+first_group$wage0    <- with(first_group, 0.9 * age + 1.2 * schooling + 1.2* score + u)
+first_group$wage1    <- first_group$wage0 + runif(n=n, min=0, max=20)
+# the last line puts the treatment effect of military service to something between 0 and 20
+# for each person. Finally the treatement effect per person
+first_group$TE       <- first_group$wage1 - first_group$wage0
+
+# take out all persons with treatment
+treatment_group <- first_group[first_group$military == 1, ]
+# Find people with exatly the same covariates
+control_group <- treatment_group[c("age", "schooling", "score")]
+# of course they are not exactly the same people
+control_group$u <- rnorm(n=nrow(control_group), mean=0, sd=5)
+control_group$military <- 0
+control_group$wage0 <- with(control_group, 0.9 * age + 1.2 * schooling + 1.2* score + u)
+# But they will have the same range of treatment effect
+control_group$wage1 <- control_group$wage0 + runif(n=nrow(control_group), min=0, max=20)
+control_group$TE <- control_group$wage1 - control_group$wage0
+
+# actual average treatment effect:
+mean(treatment_group$TE)
+# matching average treatment effect:
+mean(treatment_group$wage1 - control_group$wage0)
+```
+
+Having only 13 observations on each side makes inference noisy, but it is close to the mean of the treatment distribution. 
+
+The above example should also emphasize that matching on a variable is similar to subclasssification. E.g., we could match a treatment observation to a control observation with the closest age. Or we could group obs into age categories. The latter approach often is coarser though. 
+
+## Non-perfect matches
+
+Often you cannot find exact matches. But nearest-neighbor matching is often possible. Here, you match treatment units to the "most similar" control units based on a selection of covariates and a carefully chosen *similarity metric* like the mahalanobis distance. There are various nearest neighbor matching procedures and they mostly differ in how they measure similarity. We will talk about the most common two. But, it seems as if each scientific field has its favorit matching procedure. The rationale behind all of them is similar though. 
+
+We will try out different estimators using data from the seminal @Lalonde.1986 paper that you can find [here](http://users.nber.org/~rdehejia/data/nswdata2.html) and has been used by many textbooks and papers.
+
+>"National Supported Work Demonstration (NSW) was a temporary employment program designed to help disadvantaged workers lacking basic job skills move into the labor market by giving them work experience and counseling in a sheltered environment. Unlike other federally spon- sored employment and training programs, the NSW program assigned qualified applicants to training positions randomly. Those assigned to the treatment group received all the benefits of the NSW program, while those assigned to the control group were left to fend for themselves." [@Lalonde.1986, p. 605] 
+
+```{r}
+nsw <- read_dta("../data/nsw.dta")
+nsw$data_id <- as.factor(nsw$data_id)
+nsw$treat <- as.factor(nsw$treat)
+nsw$age <- as.integer(nsw$age)
+nsw$education <- as.integer(nsw$education)
+nsw$black <- as.factor(nsw$black)
+nsw$hispanic <- as.factor(nsw$hispanic)
+nsw$married <- as.factor(nsw$married)
+nsw$nodegree <- as.factor(nsw$nodegree)
+nsw$re75 <- as.double(nsw$re75)
+nsw$re78 <- as.double(nsw$re78)
+str(nsw)
+```
+
+The primary interest here is to estimate the impact of military service on the earnings of veterans. In a way we want to know whether veterans benefitted from military service or not. We have a sample here of applicants to the military, but not all enlisted. We assume that 
+
+ASVAB is the Armed Forces Vocational Aptitude Battery test and was first introduced in 1976.
+
+## Propensity score matching
+
+If we have many potentially confounding covariates, we can simplify the problem of matching or subclassing by creating a one-number summary of all the covariates and match on that summary. The most common version of this approach is the propensity score matching procedure. 
+
+The **propensity score** for $i$ is defined as the probability that $i$ receives the treatment, given all that we observe before the treatment. We can estimate this simply using standard approaches such as a logistic regression --  the outcome being the treatment indicator. The match is then found by locating for each treatment unit the control unit with the closest propensity score. 
+
+```{r}
+ps_fit <- glm(treat ~ age + education + black + hispanic + nodegree + married + re75,
+              data=nsw, family=binomial(link="logit"))
+summary(ps_fit)
+nsw$pscore <- predict(ps_fit, type="response")
+```
+
+```{r}
+ggplot(data=nsw, aes(x=pscore)) +
+  geom_histogram(bins=100) +
+  theme_minimal()
+```
+
+This looks like two locations. Is that good or bad?
+
+```{r}
+ggplot(data=nsw, aes(x=pscore)) +
+  geom_histogram(bins=40, aes(group=treat, fill=treat),alpha=0.2, position="identity") +
+  theme_minimal()
+```
+
+This is actually what we want. A "common support". Both treatment and control seem to have a very similar distribution of pscores already. Now, let's see how this looks like after we matched the data. 
+
+You should avoid doing matching by hand though. @Ho.2007 have a couple of suggestions for doing adequate matching and have written an R packange for it. We use the [MatchIt](http://cran.uni-muenster.de/web/packages/MatchIt/MatchIt.pdf) package for matching. It encompasses both the pscore (or more generally distance computation) and the discarding of non-matches. 
+
+```{r}
+match1 <- matchit(treat ~ age + education + black + hispanic + nodegree + married + re75, 
+                  data=nsw, method="nearest")
+summary(match1)
+```
+
+```{r}
+matched_nsw <- match.data(match1)
+```
+
+
+
+
+```{r}
+ggplot(data=matched_nsw, aes(x=distance)) +
+  geom_histogram(bins=40, aes(group=treat, fill=treat),alpha=0.2, position="identity") +
+  theme_minimal()
+```
+
+As you can see the groups are even more similar now. This is a quick way of assessing whether matching has achieved balance and overlap. At least if we believe that the pscore is a good summary measure of the covariates.
+
+## Why you shouldn't use the propensity score method
+
+I am not going to cover this in much detail because there is a phenomal talk by the person who wrote the paper on it (Gary King) and is a great instructor: [youtube](https://youtu.be/rBv39pK1iEs). I highly encourage everyone to take a look at it after the lecture as a refresher. And also check it out if you ever need to employ a matching estimator.
+
+Bottom line: Always first try to match using simple nearest neighbour matching and mahalonbis distance or something similar. It is popular in statistics. Propensity score matching is popular in economics. And the new kid on the block is genetic matching. It depends a bit on your field which method is the most accepted by reviewers etc. 
+
+```{r}
+nsw2 <- nsw
+nsw2$black    <- as.integer(nsw2$black)  # this estimator did not like the factors
+nsw2$hispanic <- as.integer(nsw2$hispanic)
+nsw2$married  <- as.integer(nsw2$married)
+nsw2$nodegree <- as.integer(nsw2$nodegree)
+match2 <- matchit(treat ~ age + education + black + hispanic + nodegree + married + re75,  
+                  data=nsw2, method="nearest", distance="mahalanobis")
+summary(match2)
+```
+
+As you can see, the fit is even better.
+
+A word of caution: 
+ 
+>If one chooses options that allow matching with replacement, or any solution that has different numbers of controls (or treateds) within each subclass or strata (such as full matching), then the parametric analysis following matching must accomodate these procedures, such as by using fixed effects or weights, as appropriate. [MathIt Documentation](https://r.iq.harvard.edu/docs/matchit/2.4-15/Conducting_Analyses_af.html)
+
+Translation: If you do not do one-to-one matching, but one-to-many (which you sometimes want to do to not throw away too many observations) and especially with replacement, you must do some additional steps after matching and adjust standard errors too. 
+
+# References
