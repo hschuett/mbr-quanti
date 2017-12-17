@@ -1,0 +1,208 @@
+---
+title: "Quantitative Methods -- Day 4: Instrumental Variables"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+```{r}
+graph_from_data_frame <- igraph::graph_from_data_frame
+library(tibble)  
+library(haven)    # read stata files
+library(lfe)      # for FE models with instruments
+```
+
+# Estimating causal effects indirectly: Instrumental variables
+
+Let's go back to our original confounding problem:
+
+```{r}
+Nodes <- tribble(
+  ~nodes,                 ~x, ~y, 
+  "Pre-T-Confounder (W)", -1,  1,  
+  "Treatment (X)",        -1,  0,  
+  "Y",                     1,  0,  
+  "All Else (u)",          1,  1)
+Edges <- tribble(
+  ~from,                 ~to,
+  "Pre-T-Confounder (W)", "Treatment (X)",
+  "Pre-T-Confounder (W)", "Y",
+  "Treatment (X)",        "Y",
+  "All Else (u)",         "Y")
+plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
+     vertex.color="gray30", vertex.size=7,
+     label.font=2, vertex.size=30, vertex.label.cex=1.2,
+     edge.arrow.size=0.5, edge.color="gray70", 
+     vertex.label.color="gray30", vertex.label.dist=2,
+     vertex.label.degree=c(-pi/2,pi/2, 0, -pi/2))
+```
+
+$W$ affects $X$ and $Y$. If we measure the relation between $Y$ and $X$ without accounting for $W$, then we cannot identify the causal effect of $x\rightarrow Y$. This is because parts of the co-movement between $X$ and $Y$ could simply be due $W$ without having any *cause* in $X$. 
+
+If we cannot measure $W$, then regression, matching, etc, does not help us in identifying the causal effect of $X$ on $Y$ because we cannot condition on $W$. Sometimes we can help ourselfs by the method of **instrumental variables (IV)**. An instrumental variable has the following form:
+
+```{r}
+Nodes <- tribble(
+  ~nodes,                 ~x, ~y, 
+  "Pre-T-Confounder (W)", -1,  1,  
+  "Treatment (X)",        -1,  0,  
+  "Y",                     1,  0,  
+  "All Else (u)",          1,  1,
+  "IV",                   -2,  0)
+Edges <- tribble(
+  ~from,                 ~to,
+  "Pre-T-Confounder (W)", "Treatment (X)",
+  "Pre-T-Confounder (W)", "Y",
+  "Treatment (X)",        "Y",
+  "All Else (u)",         "Y",
+  "IV",                  "Treatment (X)")
+plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
+     vertex.color="gray30", vertex.size=7,
+     label.font=2, vertex.size=30, vertex.label.cex=1.2,
+     edge.arrow.size=0.5, edge.color=c(rep("gray70", 4), "red"), 
+     vertex.label.color="gray30", vertex.label.dist=2,
+     vertex.label.degree=c(-pi/2,pi/2, 0, -pi/2, pi/2))
+```
+
+An instrumental variable is a variable that:
+
+1. Non-zero association between $IV$ and $X$.
+1. Only affects $Y$ through $X$ (exclusion restriction).
+1. Is independent of $W$, possibly after conditioning on other predictors. (Ignorability of the instrument)
+
+If these points are given, "random variation" in $IV$ causes random variation in $X$ and we get an *indirect* estimate of the causal effect of $X$ on $Y$. 
+
+# Example
+
+Let's take an example out of @Gelman.2007, pp. 216 to illustrate. This is a randomized-encouragement design. Suppose, we want to estimate the causal effect of wacthing Sesame Street on letter recognition. Think of a randomized experiment with pre-school children. The treatment $T$ is watching Sesame Street, the control is not watching. The outomce is the score on a test of letter recognition. 
+
+Of course, it is not possible to force children to watch a show and whether the watch or not might be related to a confounding variable that also effects letter recognition (such as curiosity maybe.) But, if watching cannot be randomized, what can we do? We can randomize encouragement to watch. Remember an instrument is a variable thought to "randomly" induce variation in the treatment of interest. Of course, we hope that encouragement actually works (point 1: encouragement is associated with actually watching Sesame Street). But that is something we can reasonably check in the data. 
+Let's load the data and check:
+
+```{r}
+sesame <- read_dta("../data/sesame.dta")
+sesame <- zap_formats(sesame)
+str(sesame)
+```
+
+The IV is *encour* and the treatment is *viewcat*. It has four categories: (1) rarely watched, (2) watched once or twice per week, (3) watched 3-5 times per week, (4) watched more than 5 times per week on average. We use a binary treatment *regular* which is 1 if we are in category (3) or (4) and zero otherwise. The outcome of interest is the letter recofnition test score *postlet*
+
+```{r}
+# Quick way of creating a frequency table:
+table(sesame$encour, sesame$viewcat)
+```
+
+So, it looks like encouraging is associate with watching more Sesame Street.
+
+We can motivate and illustrate the instrumental variable approach using regressions. The problem is that $corr(T,\epsilon_i)\neq0$ in the below equation and thus we cannot identify $\beta_1$.
+
+$$y = \beta_0 + \beta_1 T + \epsilon_i$$
+
+Now assume we have a variable $IV$ and can reason that $T$ and $IV$ are related like this: 
+
+$$T = \gamma_0 + \gamma_1 IV + v_i$$
+
+The ignorability and exclusion assumptions can be informally exressed as $corr(IV,\epsilon_i)=0$ and $corr(IV,v_i)=0$. Also $\gamma_1$ must be non-zero. 
+
+Now how does this help us identifying $\beta_1$? Let's substitute one into the other equation:
+
+$$y = \beta_0 + \beta_1 (\gamma_0 + \gamma_1 IV + v_i) + \epsilon_i$$
+
+And after rearanging:
+
+$$y = (\beta_0 + \beta_1\gamma_0) + \beta_1\gamma_1 IV + (\beta_1v_i + \epsilon_i)$$
+$$y = \delta_0 +  \delta_1 IV + u_i$$
+Now, since $\delta_1=\beta_1\gamma_1$ we can simply compute $\delta_1/\gamma_1$ to get $\beta_1$:
+
+```{r}
+fit_1a <- lm (regular ~ encour, data=sesame)
+summary(fit_1a)
+fit_1b <- lm (postlet ~ encour, data=sesame)
+summary(fit_1b)
+iv_est_1 <- coef (fit_1b)["encour"]/coef (fit_1a)["encour"]
+print(iv_est_1)
+```
+
+But again, it is crucial that $IV$ does not appear in the first outcome equation itself (exclusion restriction) and not have correlations with any of the two error terms. 
+
+You don't really want to do it this way though. For example, there is no easy way to get the right standard errors in this approach. This is simply to show the rationale behind the estimator. First of all, we usually do a 2-stage least squares procedure:
+
+```{r}
+fit_2a <- lm(regular ~ encour, data=sesame)
+sesame$regular_hat <- fit_2a$fitted
+fit_2b <- lm(postlet ~ regular_hat, data=sesame)
+summary(fit_2b)
+```
+
+You can see we get the same coefficient. However, the standard error is still wrong because we need to account for the 1st stage variation when computing this standard error. Thus, you shouldn't usually do this on your own. [see @Gelman.2007, @Wooldridge.2010 for the formula to compute the standard errors].
+
+```{r}
+# the felm model estimator has support for IV estimation, although the syntax is a bit strange:
+ivfit_1 <- felm(postlet ~ 1 |0 | (regular ~ encour) |0, data=sesame)
+summary(ivfit_1)
+```
+
+From @Gelman.2007, p ???:
+
+>It turns out that the randomization for this experiment took place within sites and settings; it is therefore appropriate to control for these covariates in estimating the treatment effect. Additionally, pre-test scores are available that are highly predictive of post-test scores. Our preferred model would control for all of these predictors. We can calculate the same ratio (intent-to-treat effect divided by effect of encouragement on viewing) as before using models that include these additional predictors but pulling out only the coefficients on *encour* for the ratio:
+
+Or in regression terms:
+
+```{r}
+fit_3a <- lm(regular  ~ encour + prelet + as.factor(site) + setting, data=sesame)
+sesame$regular_hat <- fit_3a$fitted
+fit_3b <- lm(postlet ~ regular_hat + prelet + as.factor(site) + setting, data=sesame)
+summary(fit_3b)
+```
+
+again, standard errors not correct. Better:
+
+```{r}
+ivfit_2 <- felm(postlet ~ + prelet + as.factor(site) + setting | 0 | (regular ~ encour) |0, data=sesame)
+summary(ivfit_2)
+```
+
+So, the estimated effect of watching Sesame Street on the induced watchers is about 14 points in the the letter recognition test. Let's quickly check the variation in test score to see whether this is economically significant:
+
+```{r}
+quantile(sesame$postlet, c(0.01, 0.025, 0.25, 0.5, 0.75, 0.975, 0.99))
+```
+
+```{r}
+# don't need to load ggplot this time for only creating one simple histogram
+hist(sesame$postlet, breaks=50, col=rgb(0.2, 0.3, 0.4, 0.8))
+```
+
+So, it looks like this is quite a significant effect. 
+
+# Local average treatment effects
+
+If you paid carefull attention, something might have crossed your mind. First, one could put *encour* into the regression instead of *regular*. In fact, we are doing just that in part of the illustration above. What are we estimating there? It is called an **intent-to-treat (ITT) effect**. We use this ITT to estimate the causal effect of *regular*. But we cannot do this for all kids in this study. We are estimating what is called a **locale average treatement effect (LATE)**. This is because you cannot "encourage" all kids in this study. "The exclusion restriction implies that there is no effect of the instrument (encouragement) on the outcomes for always-watchers and for never-watchers." Those kids cannot be encouraged and thus we cannot estimate a causal effect of watching Sesame Street for them. 
+
+# Problems with instrumental variables
+
+Instrumental variables is a very neat and powerful way of circumventing confounding bias. However, it all rests on two important caveats:
+
+## Weak instruments
+
+Of course, all of the above arguments rest on having a good instrument -- an $IV$ that is highly correlated with $T$. If you have a weak instrument things can get messy as your estimates of the treatment effect become very imprecise and potentially even worse than a biased OLS. This goes back to the bias - variance trade-off and the dart board analogy that we had earlier. You might thrown unbiased darts. But if you have only one throw and that throw has a large potential spread, you might actually prefer a biased throw with less spread. 
+
+The problem is the first stage of computing predictors ($T ~ IV$). "A weak first stage relationship results in variation of predicted values well below that of the original regressors, producing less efficient estimates than OLS. Weak instruments also produce biased coefficients with highly nonnormal distributions whose tail variation may be much greater than believed, generating empirical rejection rates under the null much greater than nominal size." [@Young.2017, p. 3]
+
+There are tests for weak instruments in the literature. For instance, a classic one is to compute the F-statistic from the first stage regression and see how "strongly" the null of all coefficients explaining $T$ is rejected. However, while still common practice in many applied areas, it has become criticizied latey [@Young.2017]. The reason is that F-Statistic is not well behaved in finite samples in the presence of weak instruments. 
+
+## Large sample asymptotics and finite sample problems.
+
+The standard errors calculated in most packages employing 2SLS, are based on asymptotic theory. In order to arrive at a formula for those standard errors, we need to asume a certain disttribution of the error term and often, we don't know that. But we can make arguments what the distributino will converge to (mostl to a normal distribution) if the sample size becomes large enough. So we can compute what the standard errors look like "in the asymptotic limit" of inifite sample size. However, we obvioulsy have only finite data and as such, it is always a bit of an article of faith using asymptotic standard errors for small samples. We will talk about this in much more detail in a later section. The problem is that 2SLS seems to be much more susceptible to such finite sample deviations then normal OLS. This is an ongoing field of research though [See @Young.2017], so there is no easy remedy for this, except more data and maybe bootstrapping. 
+
+
+# Excercises
+
+1. Go to [Joshua Angrist's dataverse site](https://dataverse.harvard.edu/dataset.xhtml?persistentId=hdl:1902.1/11288) and download the data necessary to replicate the main instrumental variable analysis in @Angrist.1998b. Describe what the main hypothesis is, what the accompanying research design core assumptions are and replicate the main regression.  
+ 
+# References

@@ -1,0 +1,154 @@
+---
+title: "Quantitative Methods -- Day 5: Difference-in-Difference Approaches"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+```{r}
+library(ggplot2)
+library(lfe)      # for FE models with instruments
+```
+
+# Comparisons of within and between groups
+
+Upon reflection, almost all causal strategies use comparisons across groups to identify causal effects. The whole idea of "treatment" is that one group gets "more" of the treatment than another and so on. As we have argued many times, that simple comparison is not ideal however. Treatment and control groups might differ for other reasons than the treatment and those reasons might affect the outcome as well. We can get a stronger comparison if we have an additional dimension to track treatment and outcomes. That dimension usually is time. 
+
+**Difference-in-difference** strategies typically try to exploit differences *within* groups over time as well as *between* groups. Here is why. Imagine an example from @Gelman.2007, p. 228: The effect of a newly introduced school bus program on housing prices. Some neighborhoods are affected by the program and others are not. What is the problem by simply comparing neighborhoods receiving the program and others that don't? They are likely confounders that affected which neighborhoods were included in the program and are also related to housing prices. We need to find ways to control for these confounders. If we have data on housing prices before and after the program's start we can do better than comparing the two groups of neighborhoods. We can compare how the developed over time. A **difference-in-difference** appproach calculates the difference in the before-after change between exposed and unexposed neighborhoods.  
+
+# The common trend assumption
+
+The **difference-in-difference** appproach works if the (weaker) assumption of a common trend for both groups *in the absence of treatment* holds. In the example above that means that housing prices in exposed and unexposed neighborhoods would have developed similarly over time if the program would not have existed. This is weaker than assuming that neighboroods are essentailly comparable except for the treatement. With a diff-in-diff neighborhood groups can be different, but they should develop similary over time, if it weren't for the treatment. 
+
+# Diff-in-diff designs
+
+## Notation
+
+The idea behind most diff-in-diff designs is a setup like this:
+
+$$y_{i,g,t} = \alpha_g + \tau_t + \delta\times T_{i,g,t} + u_{i,g,t}$$
+
+where $i$ is an individual observation, $g$ denotes the group it belongs to, and $t$ denotes the period of time of the observation. In this setup, the expected potential outcome for any group (treated or control) has the same form: 
+
+$$E[y^0_{i,g,t}] = \alpha_g + \tau_t $$
+It allows for differences across groups $\alpha_g$ but assumes common time developments $\tau_t$ (you can think of these as time dummies). 
+
+## Example
+
+Let's simulate the most basic form: Two groups (treated and control) and two periods (before and after)
+
+```{r}
+set.seed(666)
+grp_size <- 50
+data_1 <- data.frame(alpha = c(rep(4, grp_size*2), rep(12, grp_size*2)),
+                     tau   = rep(c(rep(4, grp_size), rep(1, grp_size)), 2),
+                     g     = c(rep(1, grp_size*2), rep(0, grp_size*2)),
+                     after = rep(c(rep(0, grp_size), rep(1, grp_size)), 2)
+                     )
+data_1$delta <- with(data_1, ifelse(g == 1 & after == 1, 3, 0))
+data_1$T <- with(data_1, ifelse(g == 1 & after == 1, 1, 0))
+data_1$y <- with(data_1, alpha + tau + delta + rnorm(n=grp_size * 4, mean=0, sd=2)) 
+```
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+data_2 <- data_1 %>% 
+  group_by(g, after) %>% 
+  summarize(y = mean(y)) %>% 
+  mutate(groups = if_else(g == 1, "T", "C"))
+
+data_3 <- data_2 %>% filter(g == 1)  
+data_3[2, "y"] <- data_3[2, "y"] - 3
+data_3$groups <- "T wo. T"
+
+data_4 <- rbind(data_2, data_3)
+
+ggplot(data_4) +
+  geom_line(aes(x=after, y=y, color=groups), size=1.5) +
+  scale_x_continuous(breaks=c(0,1)) +
+  scale_color_manual(name="Groups", values=c("#34495E", "#CB4335", "#F5B7B1")) +
+  theme_minimal() +
+  theme(panel.grid.minor = element_blank()) +
+  labs(title="Showing the common trends assumption",
+       x="Period (before vs. after)",
+       y="Outcome (y)")
+```
+
+
+You should take a look at that data and convince yourself that it fits our setup above. Afterwards, let's look at regressions:
+
+Treated versus all other obs
+```{r}
+summary(lm(y ~ T, data=data_1))
+```
+    ...
+    ...
+
+Difference between treated and control in after the treatment
+```{r}
+summary(lm(y ~ T, data=subset(data_1, after == 1)))  
+```
+    ...
+    ...
+
+Difference before and after for treated group
+```{r}
+summary(lm(y ~ T, data=subset(data_1, g == 1)))
+```
+    ...
+    ...
+
+Difference-in-difference
+```{r}
+summary(lm(y ~ g*after, data=data_1))
+```
+    ...
+    ...
+
+
+You should know enough by now about correlated omitted variable bias and confounders to explain these differences in regressions. Take a bit of time and write down your answers into the notebook below each regression
+
+## A more elabotate example
+
+Often you see diff-in-diff implemented as a fixed-effects regression with the indicator variable: 
+
+```{r}
+summary(felm(y ~ T | g + after | 0 | 0, data=data_1))
+```
+
+This is because group fixed effects take out the $\alpha_g$ components of the regression -- you take out time-stable group differences. And time fixed effects take out the $\tau_t$, the common time effects. You are essentially left with: 
+
+$$y_{i,g,t} - \alpha_g - \tau_t = \delta\times T_{i,g,t} + u_{i,g,t}$$
+
+The advantage of this regression approach to diff-in-diff is that we can easily add other covariates if we think it is necessary. 
+
+$$y_{i,g,t} = \alpha_g + \tau_t + \delta\times T_{i,g,t} + X_{i,g,t}\beta + u_{i,g,t}$$
+
+and: 
+
+$$E[y^0_{i,g,t}] = \alpha_g + \tau_t + X_{i,g,t}\beta $$
+
+And we can easily adopt more groups and periods if needed. For example, if we have neighborhoods, states or industries and some of these are treated while others are not, we can use neighborhood, state or industry fixed effects to take out the time-stable treatment/control-group differences. 
+
+Also, if we have a staggered adoption (some neighborhoods, states or industries get treated at different times) this is easily modeled as well. 
+
+## Pitfalls in Diff-in-Diff
+
+There are qite a few pitffalls when usig this approach but most of them concern whether you have carefully thought about what the economic situaiton actually is. For example in job program evaluation studies, there is often a "dip"" in earnings or employment levels (actually called Ashenfelter's dip (Ashenfelter and Card (1985)) in the periods leading up to treatment. This is because people who join the programs voluntarily often lost their jobs shortly before the treatment but people in the control did not. Such a pre-treatment dip in the treatment group would create a bias in our estimates. Always look out for such things. 
+
+# Ecercises
+
+1. Go to [Go to David Card'Site](http://davidcard.berkeley.edu/data_sets.html) and download the data for the famous @Card.1994 minimum wage study. Describe what the main hypothesis is, what the accompanying research design core assumptions are and replicate the main regression. 
+
+
+# References
+Acemoglu.2001

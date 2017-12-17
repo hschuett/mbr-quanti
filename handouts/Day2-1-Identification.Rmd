@@ -15,7 +15,7 @@ output:
 **After-class Reading:** A sizable part of this handout utilizes the excellent review @Elwert.2014. It is really well done, so please read it after class. 
 
 ```{r}
-library(igraph)
+graph_from_data_frame <- igraph::graph_from_data_frame
 library(tibble)
 ```
 
@@ -226,8 +226,8 @@ Edges <- tribble(
   "Mediator (Z)",          "Y",
   "All Else (u)",          "Y")
 g1 <- graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE)
-E(g1)$color <- "gray70"
-E(g1)$color[5:6] <- "red"
+igraph::E(g1)$color <- "gray70"
+igraph::E(g1)$color[5:6] <- "red"
 plot(g1,
      vertex.color="gray30", vertex.size=7,
      label.font=2, vertex.size=30, vertex.label.cex=1.2,
@@ -263,8 +263,8 @@ Edges <- tribble(
   "Mediator (Z)",          "Y",
   "All Else (u)",          "Y")
 g1 <- graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE)
-E(g1)$color <- "gray70"
-E(g1)$color[5:7] <- "red"
+igraph::E(g1)$color <- "gray70"
+igraph::E(g1)$color[5:7] <- "red"
 plot(g1,
      vertex.color="gray30", vertex.size=7,
      label.font=2, vertex.size=30, vertex.label.cex=1.2,

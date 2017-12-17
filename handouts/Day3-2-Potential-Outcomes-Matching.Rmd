@@ -100,7 +100,7 @@ In an experiment, we can control the design process and try to aim for missingne
 
 > The goal of matching is to reduce model dependence (Gary King)
 
-A simple regression is not always the best modelling approach for causal inference. Let's talk about why. The key problems are **lack of balance** and **lack of overlap**. Lack of balance is a problem because it forces us to rely more on the correctness of our model, which is something we would like to minimize as much as we can. Lack of overlap simply means that the range of data is not the same for treatment and control group. For the regions where there is no overlap we do not have approximations of the counterfactual and thus need to extrapolate (questions external validity). 
+A simple regression is not always the best modelling approach for causal inference. Let's talk about why. So, a regression is fine, if you have a lot of confidence in your model. If you do not have that you need to be more aware of how much "flexibility" your data allows you. The key problems are **lack of balance** and **lack of overlap**. Lack of balance is a problem because it forces us to rely more on the correctness of our model, which is something we would like to minimize as much as we can. Lack of overlap simply means that the range of data is not the same for treatment and control group. For the regions where there is no overlap we do not have approximations of the counterfactual and thus need to extrapolate (questions external validity). 
 
 
 ### Lack of balance
@@ -115,7 +115,7 @@ Averaging both equations, solving the second equation for $b_0$ and plugging tha
 $$\hat{\theta} = \bar{y}_1 - \bar{y}_0 - b_1(\bar{x}_1-\bar{x}_0) - b_2(\bar{x}^2_1 - \bar{x}^2_0)$$
 So, if we use a linear regression but do not include a quadratic term, then our estimate of the ATE will be off by $b_2(\bar{x}^2_1 - \bar{x}^2_0)$. That term will be bigger, the more different $\bar{x}$ is between treatment and control group. So lack of balance really is a problem of having to put a lot of faith into your modelspecification.
 
-So, imbalance is the source of model dependence, which leads to research discretion etc. 
+So, imbalance is the source of model dependence, which leads to research discretion etc. We can also try to visualize this: 
 
 ```{r}
 set.seed(666)
@@ -125,7 +125,7 @@ x_1b <- rnorm(n=20, mean=2,   sd=1.5)
 y_1b <- rnorm(n=20, mean=4,   sd=1.5) 
 x_1a <- rnorm(n=20, mean=0,   sd=1)
 y_1a <- rnorm(n=20, mean=1,   sd=1) 
-x_1c <- rnorm(n=20, mean=4,   sd=1)
+x_1c <- rnorm(n=20, mean=5,   sd=1)
 y_1c <- rnorm(n=20, mean=1,   sd=1) 
 
 imba <- data.frame(y = c(y_0, y_1a, y_1b, y_1c),
@@ -146,6 +146,7 @@ gridExtra::grid.arrange(base_plot + geom_smooth(method="lm", aes(color=treat)),
                         ncol=2)
 ```
 
+You see, you get quite different and big effect estimates, depending on the functional form. But let's zoom in on the region where we have balance (similar distributions of covariates in the treatment and control units) 
 
 ```{r}
 base_plot2 <- ggplot(data=sub_imba, aes(x=x, y=y)) +
@@ -157,6 +158,7 @@ gridExtra::grid.arrange(base_plot2 + geom_smooth(method="lm", aes(color=treat)),
                         ncol=2)
 ```
 
+You see that here, we don't find much and that result does not change with the functional form. The balanced data is much more agnostic to the functional form.
 
 
 ### Lack of overlap
@@ -196,7 +198,7 @@ ggplot(data=child_iq, aes(x=mom_hs, y=kid_score)) +
   theme_minimal()  # changes the default theme
 ```
 
-Note that imbalance and overlap are different concepts. The first is about differing shapes of the covariate distribution, even if they have the same data range. Overlap only concerns overlap of the data ranges.
+Note that imbalance and overlap are different concepts. The first is about differing shapes of the covariate distribution, even if they have the same data range. Overlap only concerns similarity of the data ranges.
 
 # Matching
 
@@ -336,7 +338,7 @@ ggplot(data=matched_nsw, aes(x=distance)) +
   theme_minimal()
 ```
 
-As you can see the groups are even more similar now. This is a quick way of assessing whether matching has achieved balance and overlap. At least if we believe that the pscore is a good summary measure of the covariates.
+As you can see the groups are even more similar now. This is a quick way of assessing whether matching has achieved balance and overlap. At least if we believe that the pscore is a good summary measure of the covariates. However, notice that some variables were better balanced before we did propensity score matching!
 
 ## Why you shouldn't use the propensity score method
 
