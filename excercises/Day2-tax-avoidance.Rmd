@@ -1,0 +1,208 @@
+---
+title: "Tax Avoidance and Endogeneous Selection Bias"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+
+```{r}
+library(igraph)
+library(tibble)
+library(ggplot2)
+```
+
+"We contribute to this stream of the literature by showing that if one wants to analyze the relation between tax avoidance and firm value, it is important to take into account the joint effect of not only the level of tax rates but also the uncertainty of a firm’s tax strategy. A decrease in the level of the effective tax rate (ETR) is typically assumed to be value increasing, while an increase in the uncertainty associated with tax avoidance is value decreasing. Tax uncertainty arises because taxpayers, courts, and the tax authority could interpret existing laws differently, resulting in uncertainty about the sustainability of tax positions even in the absence of tax law changes (e.g., McGuire et al. 2013; Bauer and Klassen 2014; Blouin 2014; Saavedra 2015). To motivate our reasoning, we build on the work of Feltham and Ohlson (1995) and Ohlson (1995) and use a simplified residual income valuation framework. There are two important takeaways from this approach. First, unless one is interested in measuring a specific channel (for example, agency issues, information about pre-tax earnings persistence or real effects), one can derive all the value implications of a firm’s tax strategy simply by looking at the joint effect of these two tax strategy dimensions. Second, with risk-averse investors, not only the level of tax avoidance but also the uncertainty of tax avoidance is value relevant.
+Measuring the effects of these two dimensions separately is econometrically challenging, since both are simultaneous outcomes of a firm’s tax strategy. Thus, including both separately into a regression does not yield the desired interpretation of coefficients (Gelman and Hill 2006; Angrist and Pischke 2008). To illustrate this, consider the problem of estimating the effect of a change in the level of tax avoidance while controlling for uncertainty in a regression. Since a change in tax strategy changes level and uncertainty simultaneously, a regression can only control for the observed changed uncertainty, not the hypothetical uncertainty without the change in the level. If one cannot easily obtain interpretable estimates of the effect of level and uncertainty separately when both are simultaneously determined, then a joint measure of the effect of both is a superior alternative. We propose such a joint measure of the variation in the level and uncertainty of tax rates inherent in tax strategies across firms but note at the same time that this measure shares the weaknesses of other proxies of tax uncertainty. To do this, we follow the logic of adjusting stock returns for volatility to make portfolio returns comparable (Sharpe 1966). We thus define an uncertainty-adjusted tax rate, denoted tax planning score (TPS), as the historic ratio of one minus the level of cash tax rates to the variation in cash tax rates. The TPS allows us to measure the joint outcome of a tax strategy and is interpretable intuitively: It is a measure of the average benefit from taxes saved per unit of tax rate volatility.""
+
+# Graph Representation of the Problem
+
+> "DAGs encode the analyst’s qualitative causal assumptions about the data-generating process in the population." -- [@Elwert.2014, p. 35] 
+
+The following structure of directed acyclic graphs (DAGs) is based on @Pearl.2009. A nice survey for social scientists is @Elwert.2013. Such DAGS have only a few key elements:
+
+1. Each *node* or point on it represents a random variable (observed or unobserved). Unobserved variables are sometimes marked with a hollow dot. It doesn't matter how the variables are distributied. 
+1. Arrows (*edges*) represent **assumed** direct causal effects. That why we use arrows, causal effect always have a direction (even if it is assumed). And because they reflect directed effects and the future cannot cause the past, these graphs cannot have circles. 
+1. **Missing** arrows means you assume that no direct causal link exists. This is sometimes the most debatable assumption. In econometrics we also call this an exclusion restriction. You will find that you need those in order to do any kind of identification -- if everything determines everything, there is no sense in trying to indentify isolated links. 
+
+
+```{r}
+Nodes <- tribble(
+  ~nodes,                        ~x, ~y, 
+  "Fundamentals",                 1,  0,  
+  "Tax Strategy",                 1,  3,  
+  "Level TaxRates",               3,  4,  
+  "Uncertainty TaxRates",         3,  2,  
+  "Firm Opaqueness",                12, 5,  
+  "Cash Saved",                   12, 3,  
+  "Signal fut. Pre-Tax Earnings", 12, 1,  
+  "Expropriation Risk",           22, 5,  
+  "Dividends",                    22, 4,  
+  "Investments",                  22, 2,  
+  "Market Value",                 32, 2  
+  )
+Edges <- tribble(
+  ~from,                 ~to,
+  "Fundamentals",        "Tax Strategy",
+  "Fundamentals",        "Market Value",
+  "Tax Strategy",        "Level TaxRates",
+  "Tax Strategy",        "Uncertainty TaxRates",
+  "Level TaxRates",      "Firm Opaqueness",
+  "Level TaxRates",      "Cash Saved",
+  "Level TaxRates",      "Signal fut. Pre-Tax Earnings",
+  "Uncertainty TaxRates","Firm Opaqueness",
+  "Uncertainty TaxRates","Cash Saved",
+  "Uncertainty TaxRates","Signal fut. Pre-Tax Earnings",
+  "Firm Opaqueness", "Expropriation Risk",
+  "Cash Saved", "Dividends",
+  "Cash Saved", "Investments",
+  "Signal fut. Pre-Tax Earnings", "Market Value",  
+  "Expropriation Risk",           "Market Value",  
+  "Dividends",                    "Market Value",  
+  "Investments",                  "Market Value")
+plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
+     vertex.color="gray30", 
+     vertex.size=7,
+     label.font=2, vertex.size=30, vertex.label.cex=1,
+     edge.arrow.size=0.5, edge.color="gray70", 
+     vertex.label.color="gray30", 
+     vertex.label.dist=c(2, 5, 2, 2, 2, 2, 2, 7, 2, 2, 6),
+     vertex.label.degree=c(pi/2, pi, -pi/2, pi/2, -pi/2, pi/2, pi/2, 0, -pi/2, pi/2, 0))
+```
+
+Assume the following: 
+- What we are really interested in is the effect of the tax strategy. We cannot measure that directly, but instead look at two outcomes of a tax strategy: the mean level und volatility of tax rates. 
+- There are various channesl through which the tax strategy can affect market value. For the purposes of validating our measure though, they are of no great concern at the moment. 
+
+# Simulation
+
+Assume the following:
+1. We have to types of tax strategies ($T$): normal (0) and agressive (1)
+1. $T=1$ (agressive tax strategy) leads to lower mean tax rates but also higher tax rate volatility
+1. Mean and volatility are further influenced by specific business characteristics that also affect firm value. 
+
+For simplicity, I model this as 
+
+\begin{align}
+MeanTax_{i,t} & = 0.35 - 0.15*T_{i,t} + m_{i,t} + u_{1,i,t} \\
+VolaTax_{i,t} & = 0.1 + 0.1*T_{i,t} + v_{i,t} + u_{2,i,t} \\
+MtB_{i,t} & = 2 - 0.1*MeanTax_{i,t} - 0.2*VolaTax_{i,t} + m_{i,t} + v_{i,t} + \epsilon_{i,t}
+\end{align}
+
+We can compare this to a regression regressing *MtB* on *T* directly: 
+
+\begin{align}
+MtB_{i,t} & = 2 - 0.1*(0.35 - 0.15*T_{i,t} + m_{i,t} + u_{1,i,t}) - 0.2*(0.1 + 0.1*T_{i,t} + v_{i,t} + u_{2,i,t}) + m_{i,t} + v_{i,t} + \epsilon_{i,t} \\
+~ & = 1.945 -0.005*T_{i,t} + 0.9*m_{i,t} + 0.8*v_{i,t} - 0.1*u_{1,i,t} - 0.2*u_{2,i,t} + \epsilon_{i,t}
+\end{align}
+
+Note, the total impact of *T* in this scenario is actually quite small (-0.005). Let's set up a simluation with a strong confounder and quite a bit of noise: 
+```{r}
+set.seed(999)
+nr_samples <- 10000
+N <- 1000
+compute_regression <- function(N) {
+  u1_i <- rnorm(n=N, mean=0, sd=0.1) 
+  u2_i <- rnorm(n=N, mean=0, sd=0.1) 
+  e <- rnorm(n=N, mean=0, sd=1)
+  m_i <- rnorm(n=N, mean=2, sd=2)
+  v_i <- rnorm(n=N, mean=3, sd=3)
+  T <- rbinom(n=N, size=1, prob=0.5)
+  mean_tax <- 0.35 - 0.15 * T + m_i + u1_i
+  vola_tax <- 0.1 + 0.1 * T + v_i + u2_i
+  MtB <- 2 - 0.1 * mean_tax - 0.2 * vola_tax + m_i - v_i + e
+  fit1 <- lm(MtB ~ mean_tax + vola_tax)
+  fit2 <- lm(MtB ~ T)
+  return(c(coef(fit1), coef(fit2)))
+}
+coefficients <- t(replicate(nr_samples, compute_regression(N=N)))
+```
+
+These are the results of the simulation
+
+```{r}
+summary(coefficients)
+```
+
+As you can see, estimating the effect of *T* via *T* alone works. Estimating, mean_tax and vola_tax coefficients separately, however, does not work. The reason is the presence of the *intermediate confounder* $m$ and $v$. They do not interfere with T, because they are not directly connected to T. But once we bring mean_tax and vola_tax into the picture, they become and issue. 
+Now, the big question is whether our sharpe ratio is any better. After all, The inputs to our ratio are also tainted by $m$ and $v$. So, is *TPS* a good measure of T? It can only be so, if it correctly corresponds to the relative aggressiveness in tax strategies. In the toy simlation above, we only had two strategies 1 (agressive) or 0 (normal) Ideally our TPS measure will classifiy firms correctly into agressive and normal, even in the prence of $m$ and $v$. 
+
+Let's make this clearer by again simulating things
+
+```{r}
+set.seed(999)
+N <- 1000
+u1_i <- rnorm(n=N, mean=0, sd=0.1) 
+u2_i <- rnorm(n=N, mean=0, sd=0.1) 
+m_i <- rnorm(n=N, mean=2, sd=2)
+v_i <- rnorm(n=N, mean=3, sd=3)
+TS <- rbinom(n=N, size=1, prob=0.5)
+mean_tax <- 0.35 - 0.15 * T + m_i + u1_i
+vola_tax <- 0.1 + 0.1 * T + v_i + u2_i
+TPS <- (1-mean_tax) / vola_tax
+tps_comparison <- cbind(TS=TS, TPS=TPS)
+by(data=tps_comparison, INDICES=TS, summary)
+```
+
+```{r}
+mean_tps_agg <- (1- (0.35-0.15))/(0.1+0.1)
+mean_tps_nom <- (1- (0.35))/(0.1)
+cat(paste(mean_tps_nom, "vs", mean_tps_agg, "\n"))
+
+mean_tps_agg <- (1- (0.35-0.15+2))/(0.1+0.1+3)
+mean_tps_nom <- (1- (0.35+2))/(0.1+3)
+cat(paste(mean_tps_nom, "vs", mean_tps_agg))
+```
+
+$$ TPS = \frac{1-(0.35-0.15T+m+u_1)}{0.1+0.1T+v+u_2}$$
+
+
+```{r}
+graph_data <- as_tibble(tps_comparison)
+graph_data <- graph_data[TPS < 2 & TPS > -2, ]
+ggplot(data=graph_data) +
+  geom_histogram(aes(x=TPS), bins=100) +
+  facet_wrap(~TS)
+```
+
+Hmm, that doesn't seem to be the way forward. One can see that the massive amount of interference from $m$ and $v$ makes this really hard to judge. It's probably more complicated than that. Also, we always say that managemen chooses where to position itself on the risk return portfolio for many reasons like firm characteristics, management ability, corp gov, etc. A simple 1/0 agressive/not agressive cut, might be godd for the simulation, but not helpful anymore here?... Think about that. 
+
+What we might work is when v=m??
+
+$$ TPS = \frac{1-(0.35-0.15T+m+u_1)}{0.1+0.1T+m+u_2}$$
+
+
+```{r}
+set.seed(999)
+N <- 1000
+u1_i <- rnorm(n=N, mean=0, sd=0.1) 
+u2_i <- rnorm(n=N, mean=0, sd=0.1) 
+m_i <- rnorm(n=N, mean=2, sd=2)
+v_i <- rnorm(n=N, mean=3, sd=3)
+TS <- rbinom(n=N, size=1, prob=0.5)
+mean_tax <- 0.35 - 0.15 * T + m_i + u1_i
+vola_tax <- 0.1 + 0.1 * T + m_i + u2_i
+TPS <- (1-mean_tax) / vola_tax
+tps_comparison2 <- cbind(TS=TS, TPS=TPS)
+by(data=tps_comparison2, INDICES=TS, summary)
+```
+
+
+$$ \frac{\triangle TPS}{\triangle m} = \frac{-(0.1+0.1T+m+u_2)-(1-(0.35-0.15T+m+u_1))}{(0.1+0.1T+m+u_2)^2} $$
+
+
+
+$$ \frac{\triangle TPS}{\triangle m} = \frac{-0.1-0.1T-m-u_2- 1+0.35-0.15T+m+u_1}{(0.1+0.1T+m+u_2)^2} $$
+
+
+
+$$ \frac{\triangle TPS}{\triangle m} = \frac{-0.75-0.25T-u_2+u_1}{(0.1+0.1T+m+u_2)^2} $$
+
+Ignoring the $u$s, tps would be negatively related to $m$... Can we get rid of this somehow? by reexpressing the tps??? Or can we say the magenitude is much smaller? If so under which scenarios? Can we mabe get rid of the problem by using decile ranks or something? (probably not)
+
+# References
