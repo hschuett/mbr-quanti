@@ -1,0 +1,234 @@
+---
+title: "Quantitative Methods -- Day 6: Generalized Linear Models"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../literature/bibliography.bib
+output: 
+  html_notebook: 
+    code_folding: none
+    number_sections: yes
+    toc: yes
+---
+
+```{r}
+library(lfe)      # for FE models with instruments
+cblue <- rgb(0.2,0.3,0.4,0.2)
+```
+
+# Generalized linear models
+
+So far we have only looked at OLS regressions of the form $y_i = a_0 + a_1x_i + a_2v_i + \dots +  u_i$. This is actually a special case of a more general model. You can think of a more general case:
+
+$$y_i = g(a_0 + a_1x_i + a_2v_i + \dots) +  u_i$$
+
+where $g(\cdot)$ is some function. In the classic OLS case $g(\cdot)$ is simply the identity function: $g(h) = h$. But we can put other functions in here. This is a more flexible way of describing how the conditional expectation functino $E[y|x]$ looks like. And it is most helpful when $y$ is not a continuous variable (meaning it takes on realy values between $-\infty$ and $\infty$). For example, imagine your outcome $y$ is smoking (a binary variable with yes or no) or number of patents (an non-negative integer variable). You don't really want to use normal OLS with such $y$ variables, even though you can. There are two reasons: 
+
+1. Your regression function can predict values outside $y$'s range
+2. Such variables often have non-normal conditional distributions. 
+
+Both problems are easy to show with a simple plot, tryin to fit a line through a binary variable
+
+```{r}
+set.seed(666)
+n <- 100
+x <- runif(n=n)
+y <- rbinom(n=n, size=1, prob=x)
+
+plot(x=x, y=y, col=cbue, pch=20)
+abline(lm(y~x))
+```
+
+Regarding the first point, $x$ values smaller than 0 and greater than 1 will give you predictions outside the binary data range. And regarding the second point, a 1,0 binary variable is not normally distributed and its errors from a regression will not be either.
+
+```{r}
+hist(y, col=cblue)
+```
+
+We can use an appropriate $g(\cdot)$ function to "press" the predictions of the regression part into the appropriate value range and make it comform more to the appropriate distributions. 
+
+For binary variables, this is often either the logit or probit function (giving you logistic and probit regressions) or a poisson regression for count data. 
+
+# Logistic regression
+
+As argued above, it does not make sense to fit a continuous linear model to a variable that can only take on values 0 or 1. What is often used is the following assumption:
+
+$$Pr(y_i=1) = logit^{-1}(a_0 + a_1x_i + a_2v_i + \dots)$$
+
+In the above simple example, this would give us: 
+
+```{r}
+plot(x=x, y=y, col=cblue, pch=20)
+lines(x=x, y=glm(y~x, family=binomial(link=logit))$fitted, col="red", type="p")
+```
+
+The logit function is a so called link function, linking the regression part to the outcome ($y$) value range. It has the form:
+
+$$logit^{-1}=\frac{e^x}{1+e^x}$$
+
+## Interpreting logistic regression coefficients
+
+One complication arising from generalizing the linear setup is that coefficiets become more complex to interpret. The above graph already shows you the the *slope* of the regression line is not the same at every value of $x$. That means that 1 additional unit of $x$ will increase the probability that $y$ = 1 more if $x$ is somewhere in the middle of the $x$ range than if it is at the low or high part of the $x$ range. 
+
+And it becomes even more complicated if interactions and other variables are added to the regression. In the case of a logistic regression, we can interpret the coefficients as odds ratios, which we will discuss with the following example and code from @Gelman.2007.
+
+# From @Gelman.2007 (Chapter 5) Wells in Bangladesh
+
+Many wells used for drinking water in Bangladesh are contaminated with arsenic. Arsenic is a cumulative poison, with continuing exposure linked to cancer and other deseases. 
+
+Consider the setting where a team of researchers went to an area in Bangladesh and measured the level of arsenic in each well in that area. They also labeled them as *safe* or *unsafe*. People with unsafe wells were *encouraged* to switch to safe wells of their neighbors or new wells at their own construction. A few years later the researchers returned to see who had switched. Let's use a logisitc regression to see what predicts whether a person had switched to a safe well (a binary outcome variable).
+
+$$y_i = 1 \, \, if \,\, switched \,\, \qquad y_i = 0 \, \, if \,\, same\, well \,\, $$
+
+From theory we decided on the following predictors: distance (in m) to the next safe well, arsenic level in own well, community engagement of a household member, education level of the head of household. 
+
+Let's load the data first and look at a few things.
+
+```{r}
+wells <- read.table ("../data/wells.dat")
+invlogit <- function(x) {
+  return(exp(x)/(1+exp(x)))
+}
+```
+
+
+## Histogram on distance (Figure 5.8)
+
+Some descriptives to get a feeling for the situation and the setting
+
+```{r}
+hist (wells$dist, breaks=seq(0,10+max(wells$dist[!is.na(wells$dist)]),10), 
+   xlab="Distance (in meters) to the nearest safe well", 
+   ylab="", main="", mgp=c(2,.5,0))
+```
+
+Most safe wells seem very close. 
+
+## Logistic regression with one predictor
+
+```{r}
+fit.1 <- glm (switch ~ dist, family=binomial(link="logit"), data=wells)
+summary (fit.1)
+```
+
+coefficient on distance seems low but that is because it is measured in 1 meter changes, such as the difference in swiching probability of a HH that is 50m away from the next safe well and the a HH that is 51m away. Rescaling makes this easier to interpret.
+
+## Repeat the regression above with distance in 100-meter units
+
+```{r}
+dist100 <- wells$dist/100
+fit.2 <- glm (switch ~ dist100, family=binomial(link="logit"), data=wells)
+summary(fit.2)
+```
+
+This fit corresponds to the following function:
+
+$$Pr(switch =1) = logit^{-1}(0.61 - 0.62 \times dist100)$$
+
+The constant term tells us that if $dist100 = 0$, the probability of switching is $logit^{-1}(0.61)=0.65$. The estimated probability of switching is 65% if you life right on the next safe well. 
+
+Interpreting the coefficient on dist100 is harder, as can be seen in the following figure of the fit.
+
+```{r}
+# Graphing the fitted model with one predictor (Figure 5.9)
+jitter.binary <- function(a, jitt=.05){
+  ifelse (a==0, runif (length(a), 0, jitt), runif (length(a), 1-jitt, 1))
+}
+
+switch.jitter <- jitter.binary(wells$switch)
+
+plot(wells$dist, switch.jitter, xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+curve (invlogit(coef(fit.1)[1]+coef(fit.1)[2]*x), lwd=1, add=TRUE)
+points (wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+```
+
+The line is declining, but not in a linear fashion. Thus, the change in probability for each additional 100 meters is not always the same. We need to think about how we want to evaluate this. What is often done is *evaluate the change in probability of the average firm*. We compute the distance of the average HH to the next safest well and plug this in: 
+
+```{r}
+mean(dist100)
+```
+
+```{r}
+reg_valu <- 0.61 - 0.62 * mean(dist100)
+-0.62*exp(reg_valu)/(1+exp(reg_valu))^2
+```
+
+The last formula is simply the derivative of the inverse logit function (the non-linear slop of the line above).
+
+$$\frac{d\,switch}{d\, x} = \frac{\beta e^x}{(1+e^x)^2}$$
+
+For the average HH, an increase of 100m to the next safe well would decrease the the probability of switching by 15%. (As a rule of thumb, dividing the coefficient by 4 gives you a good approximation)
+
+## Adding more predictors
+
+Let's add the level of arsenic to the model. Here is the distribution in the data
+
+```{r}
+# Histogram on arsenic levels (Figure 5.10)
+hist (wells$arsenic, 
+      breaks=seq(0,.25+max(wells$arsenic[!is.na(wells$arsenic)]),.25), 
+      freq=TRUE, 
+      xlab="Arsenic concentration in well water", 
+      ylab="", main="", 
+      mgp=c(2,.5,0))
+```
+
+
+And let's perform the Logistic regression with arsenic included
+
+```{r}
+fit.3 <- glm (switch ~ dist100 + arsenic, family=binomial(link="logit"), data=wells)
+summary(fit.3)
+```
+
+Be mindful of the conditional interpretation of the coefficients: For two HHs with the same level of arsenic in their wells, the HH with an additional 100 meters to the next safest well has a coefficient of -0.89 (rule of thumb: divided by 4 gives a -22% probability of switching if this is an average HH). Similarly, for two HHs with the same distance to the next well, the HH with 1 unit more of concentration has a coefficient of 0.46 (roT: divided by 4 yields approximately 11% higher probability of switching). We need to know how much 1 unit of concentration actually is and how often that occurs to decide which is the more important determinant however. 
+
+Some visualizations can help us understand this better:
+
+```{r}
+#  Graphing the fitted model with two predictors (Figure 5.11)
+plot(wells$dist, switch.jitter, xlim=c(0,max(wells$dist)), xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+curve (invlogit(cbind (1, x/100, .5) %*% coef(fit.3)), lwd=.5, add=TRUE)
+curve (invlogit(cbind (1, x/100, 1.0) %*% coef(fit.3)), lwd=.5, add=TRUE)
+points (wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+text (50, .27, "if As = 0.5", adj=0, cex=.8)
+text (75, .50, "if As = 1.0", adj=0, cex=.8)
+
+plot(wells$arsenic, switch.jitter, xlim=c(0,max(wells$arsenic)), xlab="Arsenic concentration in well water", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+curve(invlogit(cbind (1, 0, x) %*% coef(fit.3)), lwd=.5, add=TRUE)
+curve(invlogit(cbind (1, 0.5, x) %*% coef(fit.3)), lwd=.5, add=TRUE)
+points(wells$arsenic, jitter.binary(wells$switch), pch=20, cex=.1)
+text(1.5, .78, "if dist = 0", adj=0, cex=.8)
+text(2.2, .6, "if dist = 50", adj=0, cex=.8)
+
+#equivalently
+plot(wells$dist, switch.jitter, xlim=c(0,max(wells$dist)), xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*x/100+coef(fit.3)[3]*.50), lwd=.5, add=TRUE)
+curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*x/100+coef(fit.3)[3]*1.00), lwd=.5, add=TRUE)
+points(wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+text(50, .27, "if As = 0.5", adj=0, cex=.8)
+text(75, .50, "if As = 1.0", adj=0, cex=.8)
+
+plot(wells$arsenic, switch.jitter, xlim=c(0,max(wells$arsenic)), xlab="Arsenic concentration in well water", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*0+coef(fit.3)[3]*x), from=0.5, lwd=.5, add=TRUE)
+curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*0.5+coef(fit.3)[3]*x), from=0.5, lwd=.5, add=TRUE)
+points(wells$arsenic, jitter.binary(wells$switch), pch=20, cex=.1)
+text(1.5, .78, "if dist = 0", adj=0, cex=.8)
+text(2.2, .6, "if dist = 50", adj=0, cex=.8)
+```
+
+## Interpreting logisitc coefficients as odds ratios
+
+Another way to interpret logistic regression coefficients is in terms of **odds ratios**. If two outcomes have the probabilities $p \, (1-p)$, then $p/(1-p)$ is called the **odds**. And odds of 1 is equivalent to a 50%/50% chance. Odds of 0.5 or 2 represent 1 in 3 and 2 in 3 probabilities. But it can be achieved in many ways. Like an odds of 2 can be a change from p=0.33 to 0.5 or from p=0.5 to 0.67. *Exponentiated logistic regression coefficients can be interpreted as odds ratios*. For example, a coefficient of 0.2 can be intrpreted as a $e^{0.2}=1.22$ multiplicative difference in the odds. such as going from an odds of 1 to 1.22 (e.g., changing from p=0.5 to 0.55)
+
+Odds ratios are sometimes hard to interpret, but some people prefer it. It depends a bit on how interpretable your data is. If the units in your data are interpretable, it probably makes sense to not interpret coefficients in odds ratios but stick to computing probility changes for sensible benchmark points such as the average $x$.
+
+# Other forms: Probit and Poisson
+
+Essentially both simply assume different link functions and are useful for different types of $y$ variables. Probit and Logistic are both for binary variables and often give you the same answer. Poisson is for count data. We will not talk about those in the interest of time. But if you understood the basic difference and pitfalls moving from linear OLS to the logistic regression, you will have no problems reading up on and performing a probit or poisson regressions. 
+
+
+# Excercises
+
+1. Continue the example with the Wells in Bangladesh. Experiment with the data and see whether inferences change.
+
+# Reference
