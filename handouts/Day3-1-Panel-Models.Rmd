@@ -27,10 +27,10 @@ Imagine the following form:
 $$y_{i,t} = X_{i,t}\beta + c_i + u_{i,t}$$
 where $c_i$ does not have a time dimension. These are individual $i$ specific influences on $y$. If we cannot measure all the things in $c_i$ they would end up in the error term. And if they are correlated with $X$, then we have a correlated omitted variable problem. 
 
-In such a setting, where we have data across both time $t$ and individuals $i$ we can adress this issue. If we are willing to discard information. Imagine averaging all your data for each individual:
+In such a setting, where we have data across both time $t$ and individuals $i$ we can address this issue. If we are willing to discard information. Imagine averaging all your data for each individual:
 
 $$\bar{y}_{i} = \bar{X}_{i}\beta + c_i + \bar{u}_{i}$$
-since $c_i$ does not vary over time, their average is just the $c_i$. If we now substract the average from the actual values, $c_i$ drops out of the equation:
+since $c_i$ does not vary over time, their average is just the $c_i$. If we now subtract the average from the actual values, $c_i$ drops out of the equation:
 
 $$(y_{i,t}-\bar{y}_{i}) = (X_{i,t} -\bar{X}_{i})\beta + (c_i - c_i) + (u_{i,t} - \bar{u}_{i})$$
 
@@ -142,7 +142,7 @@ This is because, even though you cancelled the individual and time effects, they
 
 # Excercises
 
-1. Please load the aifares dataset and use it to explain the fare of a route. Use normal (pooled) OLS, then think about why a Fixed-Effects Estimator might help here. Then run a regression. Explain why you get certain results and certain errors.
+1. Please load the airfares data set and use it to explain the fare of a route. Use normal (pooled) OLS, then think about why a Fixed-Effects Estimator might help here. Then run a regression. Explain why you get certain results and certain errors.
 
 
 

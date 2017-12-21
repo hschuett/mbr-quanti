@@ -19,7 +19,7 @@ library(gridExtra)
 
 # Recap: What is uncertain about our estimates?
 
-Let's quickly recapitulate what we discussed in the last notebook. If we would replicate the same data but have unmeasured influences $u$, then we wil get different estimates. Assume again: 
+Let's quickly recapitulate what we discussed in the last notebook. If we would replicate the same data but have unmeasured influences $u$, then we will get different estimates. Assume again: 
 
 $$y_i= a_0 + a_1 * x_i + u_i$$
 
@@ -45,7 +45,7 @@ for (i in 1:reps){  # redraw unmeasured z, and v:
 }
 ```
 
-The variation is due to the unmeasured influence of $z$ and $v$. The world is too complex for us to track all influences for nealry all variables of interest and we will never be able to measure all influences. When we try to draw inferences from just one sample, we need to figure out how uncertain our estimates are. Depending if you think in Bayesian or Frequentist terms, this uncertainty is either expressed directly as uncertainty due to missing information or in terms of  hypothetical variation from imagined repeat of the experiment (which is how we framed our analysis so far). Both approaches are great, have advantages and disadvantages. Fundamentally, they just are different ways to handle the same problem: quantifying uncertainty. Let's talk about the classic frequentist approach, since this is still the de facto standard. 
+The variation is due to the unmeasured influence of $z$ and $v$. The world is too complex for us to track all influences for nearly all variables of interest and we will never be able to measure all influences. When we try to draw inferences from just one sample, we need to figure out how uncertain our estimates are. Depending if you think in Bayesian or Frequentist terms, this uncertainty is either expressed directly as uncertainty due to missing information or in terms of  hypothetical variation from imagined repeat of the experiment (which is how we framed our analysis so far). Both approaches are great, have advantages and disadvantages. Fundamentally, they just are different ways to handle the same problem: quantifying uncertainty. Let's talk about the classic frequentist approach, since this is still the de facto standard. 
 
 # Bias, variance and the error term
 
@@ -62,12 +62,12 @@ We can expand this and take a closer look why changes in $u$ affect the estimate
             & = \beta + (X'X)^{-1}X'u\\
 \end{align}
 
-Quite obviously, the estimate $\hat{\beta}$ is equal to the actual $\beta$ (if the relationship is indeed linear) plus the additional $(X'X)^{-1}u$ term. That means that in reality, we will neven measure the true $\beta$. But this tells us two things:
+Quite obviously, the estimate $\hat{\beta}$ is equal to the actual $\beta$ (if the relationship is indeed linear) plus the additional $(X'X)^{-1}u$ term. That means that in reality, we will even measure the true $\beta$. But this tells us two things:
 
 If we want to be as close as possible to the true $\beta$ we would like to: 
 
 1. Hit the true $\beta$ at least on average if we could do repeated experiments
-2. Have the term $(X'X)^{-1}u$ as small as possible so that we do stray far aways from the true $\beta$
+2. Have the term $(X'X)^{-1}u$ as small as possible so that we do stray far away from the true $\beta$
 
 Regarding point one: 
 
@@ -75,7 +75,7 @@ $$E[\hat{\beta}] = E[\beta + (X'X)^{-1}X'u]$$
 
 If $E[X'u]=0$, then $E[\hat{\beta}] = \beta$. This is sometimes called **exogeneity assumption**. We need this to hit $\beta$ at least on average. Stated another way, we need this assumption to have an *unbiased* estimator. We will talk a lot about bias in follow-on sessions.  
 
-The second desirable porperty of an estimator is low *variance*. Both *unbiasedness* and *low variance* are important. There is an incredibly nerdy [poem](../literature/Goodall-2003-Teaching_Statistics.pdf) called "Hiawatha designs an experiment", which is about a native american who learns to shoot unbiased arrows from the best statisticians in the world. Problem is that even though he would hit the target on average he sprays widely, never hits the target, and his tribe takes away his bow and arrows. 
+The second desirable property of an estimator is low *variance*. Both *unbiasedness* and *low variance* are important. There is an incredibly nerdy [poem](../literature/Goodall-2003-Teaching_Statistics.pdf) called "Hiawatha designs an experiment", which is about a native american who learns to shoot unbiased arrows from the best statisticians in the world. Problem is that even though he would hit the target on average he sprays widely, never hits the target, and his tribe takes away his bow and arrows. 
 
 ```{r}
 df <- data.frame(x1 = runif(100, min=0, max=40),
@@ -112,7 +112,7 @@ Going back to $\hat{\beta} = \beta + (X'X)^{-1}X'u$, we can try to quantify this
                      &= \underbrace{(X'X)^{-1}X'}_{\text{Weights}}\underbrace{E[uu'|X]}_{\text{Variance-Covariance of u}}\underbrace{X(X'X)^{-1}}_{\text{Weights}}\\
 \end{align}
 
-So, here again you can see, the variance of $\hat{\beta}$ (figuratively speaking: the amount of dart board that the estimator is spraying) is a function of the $E[uu'|X]$, variance-covariance matrix of the error term $u$. The more important the unmeasured influences in $u$ in terms of variation contribution for $Y$, the more it will interfere with measuring the relation between $Y$ and $X$. The joint effects of the $(X'X)^{-1}X'$ parts on both sides are similiar in spirit to the scalar expression $\cdot\frac{x}{x^2}$, which means the less variation there is in $X$, the less precise is $\hat{\beta}$. However, what is also important in $(X'X)^{-1}X'$ is the covariance between the different variables -- $x_1$, $x_2$, $x_3$, etc. -- comprising $X$. This is where *colinearity* comes in, but we will talk about that later.
+So, here again you can see, the variance of $\hat{\beta}$ (figuratively speaking: the amount of dart board that the estimator is spraying) is a function of the $E[uu'|X]$, variance-covariance matrix of the error term $u$. The more important the unmeasured influences in $u$ in terms of variation contribution for $Y$, the more it will interfere with measuring the relation between $Y$ and $X$. The joint effects of the $(X'X)^{-1}X'$ parts on both sides are similar in spirit to the scalar expression $\cdot\frac{x}{x^2}$, which means the less variation there is in $X$, the less precise is $\hat{\beta}$. However, what is also important in $(X'X)^{-1}X'$ is the covariance between the different variables -- $x_1$, $x_2$, $x_3$, etc. -- comprising $X$. This is where *colinearity* comes in, but we will talk about that later.
 
 The key term remains $E[uu'|X]$, which given the focus of the whole discussion on $u$ -- the unmeasured influences -- so far shouldn't surprise you anymore. This is a matrix with has the form: 
 
@@ -126,7 +126,7 @@ E[uu'|X] =
 \end{pmatrix}
 \end{align}
 
-This matrix is what really drives the shape of the (co-)variance of the coefficients in $\hat{\beta}=(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \dots)$. The problem is of course that we do not really know how this matrix looks like. **We can only make assumptions about its shape**. We will spend a whole session talking about what to assume here, depeding on the situation (aka clustered standard errors and the like). But for now, we will continue with the classic text book example of **homoscedasticity**. Assume: 
+This matrix is what really drives the shape of the (co-)variance of the coefficients in $\hat{\beta}=(\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2, \dots)$. The problem is of course that we do not really know how this matrix looks like. **We can only make assumptions about its shape**. We will spend a whole session talking about what to assume here, depending on the situation (aka clustered standard errors and the like). But for now, we will continue with the classic text book example of **homoscedasticity**. Assume: 
 
 \begin{align}
 E[uu'|X] = 
@@ -156,15 +156,15 @@ $$var[\hat{\beta}|X] = (X'X)^{-1}\sigma^2_u IX(X'X)^{-1} = \sigma^2_u (X'X)^{-1}
 
 Now we have a measure of how precise or imprecise the estimate is. But we still we need to figure out how to use it. One way is to use classic hypothesis testing, which is basically a decision theoretic approach to judge whether an estimator is too imprecise or not to learn something from it.
 
-Set up a *null hypothesis* and an *alternative hypothesis*. For instance, often the null is $H_0: \beta = 0$ and $H_1: \beta \neq 0$. What we want to know is whether we can reject $H_0$, i.e., whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. Hypothesis testing via p-values is a way of trying to give you a decision theoretically sound formula for such a decision, But you need to specify the amount of possible error you are willing to incurr if you make a decision. Also, p-values have been criticized very heavily in recent years. We will discuss how p-values work and what the virtues and pitfalls are next. 
+Set up a *null hypothesis* and an *alternative hypothesis*. For instance, often the null is $H_0: \beta = 0$ and $H_1: \beta \neq 0$. What we want to know is whether we can reject $H_0$, i.e., whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. Hypothesis testing via p-values is a way of trying to give you a decision theoretically sound formula for such a decision, But you need to specify the amount of possible error you are willing to incur if you make a decision. Also, p-values have been criticized very heavily in recent years. We will discuss how p-values work and what the virtues and pitfalls are next. 
 
 ## From standard errors to hypothesis testing
 
-To repeat again what we are after: we want to know is whether we can reject $H_0$. That is, whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. All the information we have to answer this question is our estimate $\hat{\beta}$ and its variance $\sigma(\hat{\beta})$. ... Or do we? Actually, we do not have this variance. That one is unknown to us too, since we cannot really do this hypothetical experiment of repating our tests and we do not know how $E[uu'|X]$ really looks like. So we need to estimate this variance from the data too and using some assumption about $E[uu'|X]$, like the one we did above: $\hat{\sigma}(\hat{\beta})$. 
+To repeat again what we are after: we want to know is whether we can reject $H_0$. That is, whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. All the information we have to answer this question is our estimate $\hat{\beta}$ and its variance $\sigma(\hat{\beta})$. ... Or do we? Actually, we do not have this variance. That one is unknown to us too, since we cannot really do this hypothetical experiment of repeating our tests and we do not know how $E[uu'|X]$ really looks like. So we need to estimate this variance from the data too and using some assumption about $E[uu'|X]$, like the one we did above: $\hat{\sigma}(\hat{\beta})$. 
 
-Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or unprecise estimation ($\hat{\sigma}(\hat{\beta})$). One the other hand a very high magnitude estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
+Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). One the other hand a very high magnitude estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
 
-Remember that if you had 1000 hypothetical replications of your data and your tests you would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would gett 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$ as well. Let's simulate that:
+Remember that if you had 1000 hypothetical replications of your data and your tests you would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$ as well. Let's simulate that:
 
 ```{r}
 set.seed(666)
@@ -210,11 +210,11 @@ We won't go into the derivations here, you can read them up in any econometric t
 
 $$\hat{\beta}\sim N\left(\beta,\, \sigma^2(X'X)^{-1}\right)$$
 
-If we knew $\sigma$ We would be done already. Per rules for normal distributions, if you substract the mean and scale a normally distibuted random variable by its standard distribution, you get the standard normal distribution:
+If we knew $\sigma$ We would be done already. Per rules for normal distributions, if you subtract the mean and scale a normally distributed random variable by its standard distribution, you get the standard normal distribution:
 
 $$\hat{\beta}\sim N\left(\beta,\, \sigma^2(X'X)^{-1}\right) \rightarrow \frac{\hat{\beta} - \beta_0}{\sigma(\beta)} \sim N(0, 1)$$
 
-$\beta_0$ is the assumed true $\beta$ under the null. In our discussion we assumed $\beta_0=0$, but we can assume other values too. The idea is exactly the same. Once you substract that value, you end up with a standard normal distribution. And we know how the standard normal distribution looks like: 
+$\beta_0$ is the assumed true $\beta$ under the null. In our discussion we assumed $\beta_0=0$, but we can assume other values too. The idea is exactly the same. Once you subtract that value, you end up with a standard normal distribution. And we know how the standard normal distribution looks like: 
 
 ```{r}
 values <- seq(-4,4,0.1)
@@ -228,13 +228,13 @@ With values greater 1.96 *or less* occurring with probability:
 pnorm(1.96, mean=0, sd=1)
 ```
 
-So, we know that there is a 2.5% chance of seing a ratio greater than 1.96 if our ratios where drawn from a standard normal distribution. Unfortunately, they are not since we do not know $\sigma^2$ in $\sigma^2(X'X)^{-1}$. We need to estimate it.
+So, we know that there is a 2.5% chance of seeing a ratio greater than 1.96 if our ratios where drawn from a standard normal distribution. Unfortunately, they are not since we do not know $\sigma^2$ in $\sigma^2(X'X)^{-1}$. We need to estimate it.
 
 A consistent estimator for $\sigma^2(X'X)^{-1}$ is 
 
 $$\hat{\sigma^2} = \frac{1}{n-k}\sum^n_{i=1} \hat{e}^2_i\rightarrow se(\hat{\beta})=\sqrt{\hat{\sigma^2}(X'X)^{-1}}$$
 
-Since it is estimated from data, $\hat{\sigma^2}$ has a distribution by itself, a chi-squared distribution. Thus, the ratio is a ratio of a normally distributed random variable to the square root of an independet chi-2 variable, which gives a t distribution (See f.e., @Goldberger.1991 pp. 223):
+Since it is estimated from data, $\hat{\sigma^2}$ has a distribution by itself, a chi-squared distribution. Thus, the ratio is a ratio of a normally distributed random variable to the square root of an independent chi-2 variable, which gives a t distribution (See f.e., @Goldberger.1991 pp. 223):
 $$t_{\hat{\beta}} = \frac{\hat{\beta}-\beta_0}{se(\hat{\beta})}\sim t_{n-k}$$
 
 Which, is why this ratio is usually called a t-statistic. Let's see whether we can visualize this to get some more intuition. 
@@ -281,11 +281,11 @@ So that probability is roughly 97.5% and the probability of seeing a value of 2 
 
 # Asymptotics
 
-For a lot of more complicated situations, where we need different assumptions and get different $se(\hat{\beta})$ estimators for example, it quickly becomes impossible to figure out the shape of the distribution of $t_{\hat{\beta}} = \frac{\hat{\beta}-\beta_0}{se(\hat{\beta})}\sim t_{n-k}$ is. In such cases one can often still make an argument what that distribution looks like if the sample becomes big. Because very often much of the randomness becomes closer and closer to a normally distributed random variable as the sample grows. In such cases, we can develop asymptotic tests. For example, see @Wooldridge.2010 p.53 für asymptotic normality. The central assumptions here are:
+For a lot of more complicated situations, where we need different assumptions and get different $se(\hat{\beta})$ estimators for example, it quickly becomes impossible to figure out the shape of the distribution of $t_{\hat{\beta}} = \frac{\hat{\beta}-\beta_0}{se(\hat{\beta})}\sim t_{n-k}$ is. In such cases one can often still make an argument what that distribution looks like if the sample becomes big. Because very often much of the randomness becomes closer and closer to a normally distributed random variable as the sample grows. In such cases, we can develop asymptotic tests. For example, see @Wooldridge.2010 p.53 for asymptotic normality. The central assumptions here are:
 
 1. Random sampling 
 1. Population orthogonality assumption  $E[x'u]=0$
-1. rank E(x'x) = K (which means no perfect colinearity)
+1. rank E(x'x) = K (which means no perfect co-linearity)
 1. $E[uu'|X] = \sigma^2I$ (homoscedasticity)
 
 Most of the problems here are finding asymptotically converging distributions for the cases where we don't want to assume homoscedasticity. Which is basically consistent with assuming that there are unmeasured influences left, but we have some idea about how the affect the behavior of the error term. We will talk more about that in a later session.

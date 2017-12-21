@@ -19,11 +19,11 @@ library(lfe)      # for FE models with instruments
 
 Upon reflection, almost all causal strategies use comparisons across groups to identify causal effects. The whole idea of "treatment" is that one group gets "more" of the treatment than another and so on. As we have argued many times, that simple comparison is not ideal however. Treatment and control groups might differ for other reasons than the treatment and those reasons might affect the outcome as well. We can get a stronger comparison if we have an additional dimension to track treatment and outcomes. That dimension usually is time. 
 
-**Difference-in-difference** strategies typically try to exploit differences *within* groups over time as well as *between* groups. Here is why. Imagine an example from @Gelman.2007, p. 228: The effect of a newly introduced school bus program on housing prices. Some neighborhoods are affected by the program and others are not. What is the problem by simply comparing neighborhoods receiving the program and others that don't? They are likely confounders that affected which neighborhoods were included in the program and are also related to housing prices. We need to find ways to control for these confounders. If we have data on housing prices before and after the program's start we can do better than comparing the two groups of neighborhoods. We can compare how the developed over time. A **difference-in-difference** appproach calculates the difference in the before-after change between exposed and unexposed neighborhoods.  
+**Difference-in-difference** strategies typically try to exploit differences *within* groups over time as well as *between* groups. Here is why. Imagine an example from @Gelman.2007, p. 228: The effect of a newly introduced school bus program on housing prices. Some neighborhoods are affected by the program and others are not. What is the problem by simply comparing neighborhoods receiving the program and others that don't? They are likely confounders that affected which neighborhoods were included in the program and are also related to housing prices. We need to find ways to control for these confounders. If we have data on housing prices before and after the program's start we can do better than comparing the two groups of neighborhoods. We can compare how the developed over time. A **difference-in-difference** approach calculates the difference in the before-after change between exposed and unexposed neighborhoods.  
 
 # The common trend assumption
 
-The **difference-in-difference** appproach works if the (weaker) assumption of a common trend for both groups *in the absence of treatment* holds. In the example above that means that housing prices in exposed and unexposed neighborhoods would have developed similarly over time if the program would not have existed. This is weaker than assuming that neighboroods are essentailly comparable except for the treatement. With a diff-in-diff neighborhood groups can be different, but they should develop similary over time, if it weren't for the treatment. 
+The **difference-in-difference** approach works if the (weaker) assumption of a common trend for both groups *in the absence of treatment* holds. In the example above that means that housing prices in exposed and unexposed neighborhoods would have developed similarly over time if the program would not have existed. This is weaker than assuming that neighborhoods are essentially comparable except for the treatment. With a diff-in-diff neighborhood groups can be different, but they should develop similarly over time, if it weren't for the treatment. 
 
 # Diff-in-diff designs
 
@@ -143,7 +143,7 @@ Also, if we have a staggered adoption (some neighborhoods, states or industries 
 
 ## Pitfalls in Diff-in-Diff
 
-There are qite a few pitffalls when usig this approach but most of them concern whether you have carefully thought about what the economic situaiton actually is. For example in job program evaluation studies, there is often a "dip"" in earnings or employment levels (actually called Ashenfelter's dip (Ashenfelter and Card (1985)) in the periods leading up to treatment. This is because people who join the programs voluntarily often lost their jobs shortly before the treatment but people in the control did not. Such a pre-treatment dip in the treatment group would create a bias in our estimates. Always look out for such things. 
+There are quite a few pitfalls when using this approach but most of them concern whether you have carefully thought about what the economic situation actually is. For example in job program evaluation studies, there is often a "dip"" in earnings or employment levels (actually called Ashenfelter's dip (Ashenfelter and Card (1985)) in the periods leading up to treatment. This is because people who join the programs voluntarily often lost their jobs shortly before the treatment but people in the control did not. Such a pre-treatment dip in the treatment group would create a bias in our estimates. Always look out for such things. 
 
 # Ecercises
 
@@ -151,4 +151,3 @@ There are qite a few pitffalls when usig this approach but most of them concern 
 
 
 # References
-Acemoglu.2001

@@ -3,11 +3,13 @@ title: 'Quantitative Methods -- Day 1: Regression Basics'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
+  word_document:
     toc: yes
   html_notebook:
     code_folding: none
     number_sections: yes
+    toc: yes
+  pdf_document:
     toc: yes
   html_document:
     df_print: paged
@@ -45,9 +47,9 @@ y_ticks <- 2 + 3 * chosen_sub_population - 0.5 * chosen_sub_population^2
 points(chosen_sub_population, y_ticks, col="red", pch=20)  # adds the average y in red for evey ticks value
 ```
 
-Think about the $x$ dimension as a continuum of groups. People/firms/observations with a low value of $x$ belong to a different group (subpopulation) than observations with a high value of $x$. The regression function describes how the outcome $y$ changes "on average" as we move from one group to the next.
+Think about the $x$ dimension as a continuum of groups. People/firms/observations with a low value of $x$ belong to a different group (sub-population) than observations with a high value of $x$. The regression function describes how the outcome $y$ changes "on average" as we move from one group to the next.
 
-This becomes even more obvious with "categorical" $x$ rather than contnuous $x$. 
+This becomes even more obvious with "categorical" $x$ rather than continuous $x$. 
 
 ```{r}
 set.seed(123)  # fix the random number generator
@@ -111,7 +113,7 @@ segments(orig$x, orig$y, plane$x, plane$y,
          )
 ```
 
-As you can see the "conditional expectation" is a regression plane. The plane gives you the average value of $y$ for a given combination of $x$ and $c$. Mind you, this is only the case because we created the data $y$ as a linear combination of $x$ anc $c$. If say the true relationship is polynomial and we would fit a linear line through it, we would not be able to fit the average well. But, we would get the best linear predictor. 
+As you can see the "conditional expectation" is a regression plane. The plane gives you the average value of $y$ for a given combination of $x$ and $c$. Mind you, this is only the case because we created the data $y$ as a linear combination of $x$ and $c$. If say the true relationship is polynomial and we would fit a linear line through it, we would not be able to fit the average well. But, we would get the best linear predictor. 
 
 
 
@@ -123,7 +125,7 @@ Assume we want to predict $y$ with $x$. We need a good prediction function. Let'
 
 $$\underset{m\in M}{\text{minimize}}\,\, E\left[(y_i - m(x_i))^2  \right]$$
 
-$m$ is a prediction function. We don't yet know, which one we want, other than that we want the one that minimizes the expected squared error from our predictions. $M$ is the set of all possible functions. This is a difficult optimiziation problem. But we do not need to solve it, we just need to check whether our candidate, the $CE = E[y|x]$ is the solution. Let's expand the inner term with the $CE$:
+$m$ is a prediction function. We don't yet know, which one we want, other than that we want the one that minimizes the expected squared error from our predictions. $M$ is the set of all possible functions. This is a difficult optimization problem. But we do not need to solve it, we just need to check whether our candidate, the $CE = E[y|x]$ is the solution. Let's expand the inner term with the $CE$:
 
 $$\underset{m\in M}{\text{minimize}}\,\, E\left[\left(\left[y_i - E[y|x]\right] + \left[E[y|x] - m(x_i)\right]\right)^2  \right]$$
 
@@ -138,7 +140,7 @@ $$\underset{m\in M}{\text{minimize}}\,\, E\left[ \left(E[y|x] - m(x_i)\right)^2 
  
 Now, it is obvious that this term is minimized (set to zero) if $m(x_i)=E[y|x]$. So the conditional expectation function is what you should use if you want to minimize squared prediction errors. And the other way around as well. **If you are interested in the conditional expectation, minimizing mean squared prediction errors gets you there.**
 
-How does simple ordinary least squares fit in? Suppose we want to limit ourselfs to linear functions out of $M$: 
+How does simple ordinary least squares fit in? Suppose we want to limit ourselves to linear functions out of $M$: 
 
 $$\beta= \underset{b}{\text{argmin}}\,\, E\left[(y_i - x'b)^2  \right]$$
 
@@ -178,9 +180,9 @@ triangle_y[2] <- triangle_y[1]
 lines(triangle_x, triangle_y)
 ```
 
-For better visibility, here is the univariate case again. The coeeficients represent the slope of the (often many-dimensional) linar projection. It tells you how the expected value of $y$ -- the average $y$ you should expect -- changes in units of $y$ with one additional unit of $x$. 
+For better visibility, here is the univariate case again. The coefficients represent the slope of the (often many-dimensional) linear projection. It tells you how the expected value of $y$ -- the average $y$ you should expect -- changes in units of $y$ with one additional unit of $x$. 
 
-But remember: A linear regression gives you the best linear predictor, which coincides with the conditional expecatation only if the true data generating process in indeed linear. 
+But remember: A linear regression gives you the best linear predictor, which coincides with the conditional expectation only if the true data generating process in indeed linear. 
 
 
 ```{r}
@@ -203,7 +205,7 @@ Consider the model:
 
 $$y = X_1 \beta_1 + X_2 \beta_2 + u$$
 
-One of the great things (and terribly confusing things) about multivariate Regressions is that the coefficients can be interpreted as the average change in $y$ while holding other variables fixed. In the above equation $\beta_1$ is the avrage change in $y$ for a 1-unit change in $X_1$, holding $X_2$ constant. The same goes for $\beta_2$. 
+One of the great things (and terribly confusing things) about multivariate Regressions is that the coefficients can be interpreted as the average change in $y$ while holding other variables fixed. In the above equation $\beta_1$ is the average change in $y$ for a 1-unit change in $X_1$, holding $X_2$ constant. The same goes for $\beta_2$. 
 
 Let's see this with an example:
 
@@ -223,11 +225,11 @@ For the theorem, we first need to introduce a certain way of presenting residual
 $$My = (I - X(X'X)^{-1}X')y = y - X(X'X)^{-1}X'y = y - X\beta = u$$
 Multiplying $M$ on the left with $y$ yields the residual $u$. We need this matrix for the following proof: 
 
-Consider again: $y = X_1 \beta_1 + X_2 \beta_2 + u$. We are interested in the interpretation of $\beta_2$, which is the effect of $X_2$ on $y$ hodling $X_1$ constant. In a way we could take out the relation of $X_1$ with both $y$ and $X_2$ and regress what is left of $y$ and $X_2$. We can use the residual maker matrix for that $\tilde{y}=M_1y$ and $\tilde{X}_2=M_1X_2$ are the residuals after taking out the linear relation with $X_1$. Then regress $\tilde{y}$ on $\tilde{X}_2$
+Consider again: $y = X_1 \beta_1 + X_2 \beta_2 + u$. We are interested in the interpretation of $\beta_2$, which is the effect of $X_2$ on $y$ holding $X_1$ constant. In a way we could take out the relation of $X_1$ with both $y$ and $X_2$ and regress what is left of $y$ and $X_2$. We can use the residual maker matrix for that $\tilde{y}=M_1y$ and $\tilde{X}_2=M_1X_2$ are the residuals after taking out the linear relation with $X_1$. Then regress $\tilde{y}$ on $\tilde{X}_2$
 
 $$\tilde{y} = \tilde{X}_2a_2 + u_2$$
  
-Now, this is a regression of $y$, after taking out the relation with $X_1$, on $X_2$, after taking out its relation with $X_1$. The first part of the FWL Theoreom shows that $a_2 = \beta_2$, supporting the partialling out interpretation of $\beta_2$. The second part (which we won't look at) shows that you also get the same standard errors. 
+Now, this is a regression of $y$, after taking out the relation with $X_1$, on $X_2$, after taking out its relation with $X_1$. The first part of the FWL Theorem shows that $a_2 = \beta_2$, supporting the partialling out interpretation of $\beta_2$. The second part (which we won't look at) shows that you also get the same standard errors. 
 
 Let's look at $a_2$:
 

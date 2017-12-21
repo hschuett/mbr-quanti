@@ -20,7 +20,7 @@ library(ggplot2)
 
 # Colinearity
 
-$x$-variables are almost always correlated with each other. This makes coefficient estimates less precise. The extrem is variables which are perfectly correlated. That is equivalent to saying that one variable is a linear function of one or more of the remaining variables. In that case, OLS breaks down because you cannot compute the inverse $(X'X)^{-1}$ anymore. But it is also not surprising that it breaks down. If one variable is a linear function of other variables, then the same must go for its coefficient. That one should also be a linear function of the other coefficients. That means there are infinitely many coefficient combinations possible, no unique solution exists and OLS breaks down. Essentially, OLS does not know which variable it should allocate the effect to. Many solutions give you the same best fit. The problem is not so severe if variables are simply correlated, but a similar problem exists. Say you have two variables $x_1$ and $x_2$. Both move in tandem quite often and with $y$. When $x_1$ goes up, so does $x_2$ and $y$. Then it is hard to figure out, whether it is $x_1$ or $y$ that is associated with $y$. Essentially OLS tries to separate the impact of $x_1$ and $x_2$ from the few observations where $x_1$ and $x_2$ do not move similarly. If that does not happen often, the estimates are more uncertain. If it never happens you have perfect colinearity and OLS breaks down.
+$x$-variables are almost always correlated with each other. This makes coefficient estimates less precise. The extreme is variables which are perfectly correlated. That is equivalent to saying that one variable is a linear function of one or more of the remaining variables. In that case, OLS breaks down because you cannot compute the inverse $(X'X)^{-1}$ anymore. But it is also not surprising that it breaks down. If one variable is a linear function of other variables, then the same must go for its coefficient. That one should also be a linear function of the other coefficients. That means there are infinitely many coefficient combinations possible, no unique solution exists and OLS breaks down. Essentially, OLS does not know which variable it should allocate the effect to. Many solutions give you the same best fit. The problem is not so severe if variables are simply correlated, but a similar problem exists. Say you have two variables $x_1$ and $x_2$. Both move in tandem quite often and with $y$. When $x_1$ goes up, so does $x_2$ and $y$. Then it is hard to figure out, whether it is $x_1$ or $y$ that is associated with $y$. Essentially OLS tries to separate the impact of $x_1$ and $x_2$ from the few observations where $x_1$ and $x_2$ do not move similarly. If that does not happen often, the estimates are more uncertain. If it never happens you have perfect co-linearity and OLS breaks down.
 
 What this means in practice is that our $\hat{\beta}$ are less precisely estimated (we are more likely to get extreme estimates) and high standard errors. Remember the representation of our estimates:
 
@@ -65,7 +65,7 @@ summary(fit_b)
 # Measurement Error
 
 ## The problem
-A general probelm you should be aware of is measurement error. Many of our constructs and concepts (sentiment, earnings quality, risk aversion, ability, financial constraints, marginal tax rate, happines, customer satisfaction,etc.) are unobservable or hard to measure. We can try to find or create proxies. However, these will invariably measure our construct of interest with error. Think about all the textual analysis measures for sentiment, readability etc. For example, using the number of negative words as a measure of text tone. Obviously, this will not capture every nuance; it will contain significant measurement error of the real tone of the text. 
+A general problem you should be aware of is measurement error. Many of our constructs and concepts (sentiment, earnings quality, risk aversion, ability, financial constraints, marginal tax rate, happiness, customer satisfaction,etc.) are unobservant or hard to measure. We can try to find or create proxies. However, these will invariably measure our construct of interest with error. Think about all the textual analysis measures for sentiment, readability etc. For example, using the number of negative words as a measure of text tone. Obviously, this will not capture every nuance; it will contain significant measurement error of the real tone of the text. 
 
 Depending on the amount of measurement error, proxies are like a broad sword as compared to a scalpel. It is fine for research questions where you are after broad effects. But you have to be careful with questions that require a scalpel. In those cases, you really need to be concerned about measurement error. 
 
@@ -81,7 +81,7 @@ $$y = a_0 + a_1 x_1 + a_2 x_2 + a_3 x_3 + (u - a_3e_3)$$
 
 The measurement error moves into the error term. Because the measurement error lurks in the error term, you get something very similar to a correlated omitted variables problem, if the measurement error is correlated with $x_3$. In quite a few cases this is the case. 
 
-Let's assume the average measurement error is zero $E[e_3]=0$ (not a very conequential assumption because of the intercept in our regressions). The **classical errors-in-variables (CEV)** assumption is that the measurement error is uncorrelated with the true unobserved variable:
+Let's assume the average measurement error is zero $E[e_3]=0$ (not a very consequential assumption because of the intercept in our regressions). The **classical errors-in-variables (CEV)** assumption is that the measurement error is uncorrelated with the true unobserved variable:
 
 $$cov(x^*_3, e_3)=0$$
 
@@ -99,7 +99,7 @@ colGPA ¼ b0 þb1 famincþb2hsGPAþb3SAT þv
 
 ## Excercises
 
-1. What happens if we assume the flipside of the CEV?
+1. What happens if we assume the flip-side of the CEV?
 
 
 

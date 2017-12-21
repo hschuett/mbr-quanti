@@ -79,7 +79,7 @@ If these points are given, "random variation" in $IV$ causes random variation in
 
 # Example
 
-Let's take an example out of @Gelman.2007, pp. 216 to illustrate. This is a randomized-encouragement design. Suppose, we want to estimate the causal effect of wacthing Sesame Street on letter recognition. Think of a randomized experiment with pre-school children. The treatment $T$ is watching Sesame Street, the control is not watching. The outomce is the score on a test of letter recognition. 
+Let's take an example out of @Gelman.2007, pp. 216 to illustrate. This is a randomized-encouragement design. Suppose, we want to estimate the causal effect of watching Sesame Street on letter recognition. Think of a randomized experiment with pre-school children. The treatment $T$ is watching Sesame Street, the control is not watching. The outcome is the score on a test of letter recognition. 
 
 Of course, it is not possible to force children to watch a show and whether the watch or not might be related to a confounding variable that also effects letter recognition (such as curiosity maybe.) But, if watching cannot be randomized, what can we do? We can randomize encouragement to watch. Remember an instrument is a variable thought to "randomly" induce variation in the treatment of interest. Of course, we hope that encouragement actually works (point 1: encouragement is associated with actually watching Sesame Street). But that is something we can reasonably check in the data. 
 Let's load the data and check:
@@ -90,7 +90,7 @@ sesame <- zap_formats(sesame)
 str(sesame)
 ```
 
-The IV is *encour* and the treatment is *viewcat*. It has four categories: (1) rarely watched, (2) watched once or twice per week, (3) watched 3-5 times per week, (4) watched more than 5 times per week on average. We use a binary treatment *regular* which is 1 if we are in category (3) or (4) and zero otherwise. The outcome of interest is the letter recofnition test score *postlet*
+The IV is *encour* and the treatment is *viewcat*. It has four categories: (1) rarely watched, (2) watched once or twice per week, (3) watched 3-5 times per week, (4) watched more than 5 times per week on average. We use a binary treatment *regular* which is 1 if we are in category (3) or (4) and zero otherwise. The outcome of interest is the letter recognition test score *postlet*
 
 ```{r}
 # Quick way of creating a frequency table:
@@ -107,13 +107,13 @@ Now assume we have a variable $IV$ and can reason that $T$ and $IV$ are related 
 
 $$T = \gamma_0 + \gamma_1 IV + v_i$$
 
-The ignorability and exclusion assumptions can be informally exressed as $corr(IV,\epsilon_i)=0$ and $corr(IV,v_i)=0$. Also $\gamma_1$ must be non-zero. 
+The ignorability and exclusion assumptions can be informally expressed as $corr(IV,\epsilon_i)=0$ and $corr(IV,v_i)=0$. Also $\gamma_1$ must be non-zero. 
 
 Now how does this help us identifying $\beta_1$? Let's substitute one into the other equation:
 
 $$y = \beta_0 + \beta_1 (\gamma_0 + \gamma_1 IV + v_i) + \epsilon_i$$
 
-And after rearanging:
+And after rearranging:
 
 $$y = (\beta_0 + \beta_1\gamma_0) + \beta_1\gamma_1 IV + (\beta_1v_i + \epsilon_i)$$
 $$y = \delta_0 +  \delta_1 IV + u_i$$
@@ -182,7 +182,7 @@ So, it looks like this is quite a significant effect.
 
 # Local average treatment effects
 
-If you paid carefull attention, something might have crossed your mind. First, one could put *encour* into the regression instead of *regular*. In fact, we are doing just that in part of the illustration above. What are we estimating there? It is called an **intent-to-treat (ITT) effect**. We use this ITT to estimate the causal effect of *regular*. But we cannot do this for all kids in this study. We are estimating what is called a **locale average treatement effect (LATE)**. This is because you cannot "encourage" all kids in this study. "The exclusion restriction implies that there is no effect of the instrument (encouragement) on the outcomes for always-watchers and for never-watchers." Those kids cannot be encouraged and thus we cannot estimate a causal effect of watching Sesame Street for them. 
+If you paid careful attention, something might have crossed your mind. First, one could put *encour* into the regression instead of *regular*. In fact, we are doing just that in part of the illustration above. What are we estimating there? It is called an **intent-to-treat (ITT) effect**. We use this ITT to estimate the causal effect of *regular*. But we cannot do this for all kids in this study. We are estimating what is called a **locale average treatement effect (LATE)**. This is because you cannot "encourage" all kids in this study. "The exclusion restriction implies that there is no effect of the instrument (encouragement) on the outcomes for always-watchers and for never-watchers." Those kids cannot be encouraged and thus we cannot estimate a causal effect of watching Sesame Street for them. 
 
 # Problems with instrumental variables
 
@@ -192,13 +192,13 @@ Instrumental variables is a very neat and powerful way of circumventing confound
 
 Of course, all of the above arguments rest on having a good instrument -- an $IV$ that is highly correlated with $T$. If you have a weak instrument things can get messy as your estimates of the treatment effect become very imprecise and potentially even worse than a biased OLS. This goes back to the bias - variance trade-off and the dart board analogy that we had earlier. You might thrown unbiased darts. But if you have only one throw and that throw has a large potential spread, you might actually prefer a biased throw with less spread. 
 
-The problem is the first stage of computing predictors ($T ~ IV$). "A weak first stage relationship results in variation of predicted values well below that of the original regressors, producing less efficient estimates than OLS. Weak instruments also produce biased coefficients with highly nonnormal distributions whose tail variation may be much greater than believed, generating empirical rejection rates under the null much greater than nominal size." [@Young.2017, p. 3]
+The problem is the first stage of computing predictors ($T ~ IV$). "A weak first stage relationship results in variation of predicted values well below that of the original regressors, producing less efficient estimates than OLS. Weak instruments also produce biased coefficients with highly non-normal distributions whose tail variation may be much greater than believed, generating empirical rejection rates under the null much greater than nominal size." [@Young.2017, p. 3]
 
-There are tests for weak instruments in the literature. For instance, a classic one is to compute the F-statistic from the first stage regression and see how "strongly" the null of all coefficients explaining $T$ is rejected. However, while still common practice in many applied areas, it has become criticizied latey [@Young.2017]. The reason is that F-Statistic is not well behaved in finite samples in the presence of weak instruments. 
+There are tests for weak instruments in the literature. For instance, a classic one is to compute the F-statistic from the first stage regression and see how "strongly" the null of all coefficients explaining $T$ is rejected. However, while still common practice in many applied areas, it has become criticized lately [@Young.2017]. The reason is that F-Statistic is not well behaved in finite samples in the presence of weak instruments. 
 
 ## Large sample asymptotics and finite sample problems.
 
-The standard errors calculated in most packages employing 2SLS, are based on asymptotic theory. In order to arrive at a formula for those standard errors, we need to asume a certain disttribution of the error term and often, we don't know that. But we can make arguments what the distributino will converge to (mostl to a normal distribution) if the sample size becomes large enough. So we can compute what the standard errors look like "in the asymptotic limit" of inifite sample size. However, we obvioulsy have only finite data and as such, it is always a bit of an article of faith using asymptotic standard errors for small samples. We will talk about this in much more detail in a later section. The problem is that 2SLS seems to be much more susceptible to such finite sample deviations then normal OLS. This is an ongoing field of research though [See @Young.2017], so there is no easy remedy for this, except more data and maybe bootstrapping. 
+The standard errors calculated in most packages employing 2SLS, are based on asymptotic theory. In order to arrive at a formula for those standard errors, we need to assume a certain distribution of the error term and often, we don't know that. But we can make arguments what the distribution will converge to (mostly to a normal distribution) if the sample size becomes large enough. So we can compute what the standard errors look like "in the asymptotic limit" of infinite sample size. However, we obviously have only finite data and as such, it is always a bit of an article of faith using asymptotic standard errors for small samples. We will talk about this in much more detail in a later section. The problem is that 2SLS seems to be much more susceptible to such finite sample deviations then normal OLS. This is an ongoing field of research though [See @Young.2017], so there is no easy remedy for this, except more data and maybe bootstrapping. 
 
 
 # Excercises

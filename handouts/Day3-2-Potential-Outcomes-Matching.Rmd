@@ -359,10 +359,14 @@ summary(match2)
 
 As you can see, the fit is even better.
 
+# Standard Errors when matching
+
 A word of caution: 
  
 >If one chooses options that allow matching with replacement, or any solution that has different numbers of controls (or treateds) within each subclass or strata (such as full matching), then the parametric analysis following matching must accomodate these procedures, such as by using fixed effects or weights, as appropriate. [MathIt Documentation](https://r.iq.harvard.edu/docs/matchit/2.4-15/Conducting_Analyses_af.html)
 
-Translation: If you do not do one-to-one matching, but one-to-many (which you sometimes want to do to not throw away too many observations) and especially with replacement, you must do some additional steps after matching and adjust standard errors too. 
+Translation: If you do not do one-to-one matching, but one-to-many (which you sometimes want to do to not throw away too many observations) and especially with replacement, you must do some additional steps after matching.
+
+In additon, the standard errors of matched data are not technically correct. First, Matching obviously induces correlation among matched observations, but you can account for this by including the variables by which you matched into the regression. But, a largely unresolved problem is the uncertainty included in the proensity score or similar approaches is not reflected in the standard errors.
 
 # References
