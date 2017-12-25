@@ -32,14 +32,14 @@ Because of all the unmeasured influences, there will always be variation. Rememb
 set.seed(123)  # fix the random number generator
 age_range <- 16:24
 age <- sample(x=age_range, size=100, replace=TRUE)  # draw 100 integers randomly
-y <- 2 + 3 * age - 0.5*age^2 + rnorm(100, 0, 20)  # create a new variable y as linear additive function of x
+y <- 2 + 3 * age - 0.5*age^2 + rnorm(100, 0, 20)  # y as linear additive function of x
 plot(age, y,  # plot x vs y (draws points by default)
      col=rgb(0.2, 0.3, 0.4, 0.3),  # color of the points
      pch=16,  # point character, 16 is a small dot
      xlab="Subpopulations defined by different values of 'age'",
      ylab="Outcome")  
 y_ticks <- 2 + 3 * age_range - 0.5 * age_range^2
-points(age_range, y_ticks, col="red", pch=20)  # adds the average y in red for evey ticks value
+points(age_range, y_ticks, col="red", pch=20)  # adds average y for evey ticks value
 ```
 
 Even, though this is simulated, this illustrates the main problem. Suppose for instance the outcome is some kind of happiness index and you get this picture: happiness seems to go down with age. But there is variation around the average. Where would such variation come from? From the myriad other things that influence happiness in addition to age. This is also the reason, we are interested in average effects. We want to know how things change on average as $x$ varies, knowing full well that the outcome depends on tons of other things as well. Sometimes you hear this in workshops: "But does your variable of interest not depend on so many other things?" What is usually behind that question is that the asking person does not believe $x$ to be an important enough variable that would meaningfully shift the average without taking into account many contextual factors. We will talk about how to handle such things in later parts.  
@@ -57,7 +57,7 @@ coin_tosses <- table(rbinom(n=100, size=1, prob=c(0.5,0.5)))
 barplot(coin_tosses, names.arg=c("Heads", "Tails"))
 ```
 
-But when we did this, notice that we have not used any information on the coin tosses. If we would actually perform these tosses and we could measure wind, throwing angle, speed of rotation, etc. we might actually be able to predict quite well how the coin will land. The 50%/50% probability is really a randomness that originates from us not measuring all the determinants of the coin toss. The more we would measure those, the less "random" the coin tosses would be. 
+But when we do this, notice that we have not used any information on the coin tosses. If we would actually perform these tosses and we could measure wind, throwing angle, speed of rotation, etc. we might actually be able to predict quite well how the coin will land. The 50%/50% probability is really a randomness that originates from us not measuring all the determinants of the coin toss. The more we would measure those, the less "random" the coin tosses would be. 
 
 ## Drawing inference from data
 
@@ -65,10 +65,10 @@ Let's use a typical text book question: "What are the returns to schooling?" How
 
 Now, below I give you a data set with wage data. It contains the following variables
 
-    wage:: monthly wage in $100
-    education:: years of education
-    parent_education:: years of education of the least educated parent
-    school:: a code for the high school visited
+    wage: monthly wage in $100
+    education: years of education
+    parent_education: years of education of the least educated parent
+    school: a code for the high school visited
 
 Let's look at the data:
 
@@ -131,9 +131,9 @@ draw_hist_row(data=wages_data2, color="red")
 draw_hist_row(data=wages_data3, color="green")
 ```
 
-As you can see, the survey service took great pains to get as close to collecting the same sample as possible. The plots show that people with exactly equal characteristics were interviewed. However, wage, while showing a similar distribution differs. Why? Because, in addition to the observed variables (education, parent_education, school, and occupation) the wage is probably determined by tons of other things that we have did not measure. So, even if we would collect hundred more samples with the same observables, we will always get a slightly different wage distribution. Because there are a few things that we did not know could matter, or could not measure, or where to expensive to measure, etc. So we can never truly replicate a study. 
+As you can see, the survey service took great pains to get as close to collecting the same sample as possible. The plots show that people with exactly equal characteristics were interviewed. However, wage, while showing a similar distribution differs. Why? Because, in addition to the observed variables (education, parent_education, school, and occupation) the wage is probably determined by many other things that they did/could not measure in the first and subsequent surveys. Things that we did not know could matter, or could not measure, or where to expensive to measure, etc. Thus we can never truly replicate a study. Even if we would collect hundred more samples with the same observables, we will always get a slightly different wage distribution. 
 
-Now, what does that imply? Well, if we estimate the relation, between education an wage, what will happen? Let's see:
+Of course, this will have an impact on our conditional expectation estimate:
 
 ```{r}
 plot(x=wages_data$education, y=wages_data$wage,col=ablue, pch=20, cex=2)
@@ -146,18 +146,17 @@ abline(reg3, lwd=1.8, col="green")
 
 As you can see, the regression lines differ. Which one is the correct one? None of the three is. Why? Think about how wage is determined:
 
-
 $$wage_i = f\left(education_i, parent\_education_i, school\_quality_i, occupation\_wage\_level_i \right)+ u_i$$
 
-We *assume* that education, parent_education, school, and occupation matter. We don't know for sure and we don't quite know how either. Said differently, we don't know the functional form of $f(\cdot)$. And there are likely tons of things that also play a role like person $i$'s ability. Such additional determinants are captured in that $u_i$ term. It often called the *error term* but is really only a catch-all term for everything unmeasured. 
+We *assume* that education, parent_education, school, and occupation matter. We don't know for sure and we don't quite know how either. Said differently, we don't know the functional form of $f(\cdot)$ with certainty. And there are likely many things that also play a role ,like person $i$'s ability. Such additional determinants are captured in the $u_i$ term. It is often called the *error term*, but is really only a catch-all term for everything unmeasured. 
 
-So, going back to our free samples, all samples are likely equal in the $f\left(education_i, parent\_education_i, school\_quality_i, occupation\_wage\_level_i \right)$ part, but differ in the $u_i$ part! Frequentists statisticians think of this part as the "random part". **Taken together with our uncertainty about the true mechanism, that part that induces uncertainty in our estimates.** Because $u_i$ differs from sample to sample, it induces variation in estimates. This is a critical point that you should really strive to understand. 
+So, going back to our free samples, all samples are likely equal in the $f\left(education_i, parent\_education_i, school\_quality_i, occupation\_wage\_level_i \right)$ part, but differ in the $u_i$ part! Frequentists statisticians think of this part as the "random part". **Taken together with our uncertainty about the true mechanism, this part induces uncertainty in our estimates.** Because $u_i$ differs from sample to sample, it induces variation in estimates. This is a critical point that you should really strive to understand. 
 
 Imagine, a fully deterministic mechanism:
 
 $$y_i= 1 + 2 * x_i + 3*z_i -2 * v_i$$
 
-But you don't know that. You only guess that $y$ and $x$ are related, but you don't know that it is a linear relation, you don't know the effect of $x$ on $y$ is stable, with magnitude 2, and you don't know about $z$ and $v$. We might assume that the relation is of the general form: 
+But you don't know that. You only hypothesize that $y$ and $x$ are related, but you don't know that it is a linear relation, you don't know the effect of $x$ on $y$ is stable, with magnitude 2, and you don't know about $z$ and $v$. We might assume that the relation is of the general form: 
 
 $$y_i= a_0 + a_1 * x_i + u_i$$
 
@@ -165,7 +164,7 @@ where $u_i = 3*z_i -2 * v_i$. We can fit this with a regression.
 
 $$y_i= \hat{a}_0 + \hat{a}_1 * x_i + \hat{u}_i$$
 
-The regression tries to find an $\hat{a}_0$ and $\hat{a}_1$ that minimizes tries to explain as much as possible of $y$. That is simply another way of saying it minimizes the sum of of squared residuals $\hat{u}_i$. Or that it estimates the conditional expectation. How the average $y$ changes with changes in $x$. Let's simulate this case to make it more accessible.
+The regression tries to find an $\hat{a}_0$ and $\hat{a}_1$ that minimizes the sum of squared error -- tries to explain as much as possible of $y$. That is simply another way of saying it minimizes the sum of of squared residuals $\hat{u}_i$. Or that it estimates the conditional expectation. How the average $y$ changes with changes in $x$. Let's simulate this case to make it more accessible.
 
 ```{r}
 set.seed(9870137)
@@ -181,7 +180,7 @@ plot(x, y, pch=20, main=paste("a1:", x_coeff))
 abline(reg_ex)
 ```
 
-You can see that the estimate $\hat{a}_1$ is not exactly equal $a_1=2$. Since we simulated this, we know the average of $y$ changes its magnitude by 2, as we changes $x$ by one unit. However, our estimate is only 1.77. Why? This is because of all the unmeasured stuff ($v$ and $z$ in $u$). $v$ and $z$ affect $y$, but since we did not measure them, their effect is "random". That random interference makes the estimated relation between $y$ and $x$ differ from $2$, if we try to explain as much of $y$ as we can with $x$!
+You can see that the estimate $\hat{a}_1$ is not exactly equal $a_1=2$. Since we simulated this, we know the average of $y$ changes its magnitude by 2, as we changes $x$ by one unit. However, our estimate is only 1.77. Why? This is because of all the unmeasured stuff ($v$ and $z$ in $u$). $v$ and $z$ affect $y$, but since we did not measure them, their effect is "random". That random interference makes the estimated relation between $y$ and $x$ differ from $2$.
 
 If we would control the effects of these two variables in a multivariate regression, we would not have that problem
 
@@ -189,7 +188,7 @@ If we would control the effects of these two variables in a multivariate regress
 coef(lm(y ~ x + v + z))
 ```
 
-You see, if we put v and z into the equation, we get exactly the coefficients. There is no uncertainty left (Except for functional form. Here, we guessed the functional form -- linear, additive -- correct as well)
+You see, if we put v and z into the equation, we get exactly the coefficients. There is no uncertainty left (Except for functional form. Here, we know the functional form -- linear, additive -- as well)
 
 
 
@@ -197,7 +196,7 @@ You see, if we put v and z into the equation, we get exactly the coefficients. T
 
 ## Sampling uncertainty
 
-We understand now where uncertainty comes from and what randomness really means. When we have a research question and a sample that we want to use the sample to answer the research question, we face model uncertainty and the sample does never include all important determinants. In frequentist terms, we could make a thought experiment: what would happen to our estimates, if we could replicate our sample, with exactly the same measured, observable variable. Of course, we won't be able to replicate the unmeasured determinants, so our outcome variable will be different, leading to different estimates. **But, if we could do such replications, we can use that variation in estimates to measure uncertainty in estimates due to the variation in unmeasured variables**. This is again something we can simulate:
+We understand now where uncertainty comes from and what randomness really means. When we have a research question and a sample that we want to use, we face model uncertainty and uncertainty from unmeasured influences. In frequentist terms, we now make a thought experiment: what would happen to our estimates, if we could replicate our sample, with exactly the same measured, observable variables? Of course, we won't be able to replicate the unmeasured determinants, so our outcome variable will be different, leading to different estimates. **But, if we could do such replications, we can use that variation in estimates to measure uncertainty in estimates due to the variation in unmeasured variables**. This is again something we can simulate:
 
 We keep the same $x$. Because we draw 1000 different $z$ and $v$ and recompute $y$.
 
@@ -215,17 +214,17 @@ hist(a1_sim, breaks=100, main="", xlab="Estimates of a1", col=cblue)
 abline(v=2,col="red")
 ```
 
-This variation tells us how much uncertainty we have in our estimate. Only our situation is usually:
+This variation tells us how much uncertainty we have in our estimate. This is a gross over-simplified simulation of course. In a normal situation:
 
 - we don't know that $a_1$ is actually 2
 - we only have one sample
-- we do not know whether the assumed functional form (linear, additive) is even correct
+- we do not know whether the assumed functional form (linear, additive) is correct
 
-We cannot easily incorporate the last point. An often overlooked caveat is that everything we will discuss in a bit (standard errors, p-values, etc.) is conditional on us correctly guessing the overall functional form. 
+We cannot easily incorporate the last point. An often overlooked caveat is that everything we will discuss in a bit (standard errors, p-values, etc.) is conditional on us correctly guessing the overall functional form (But in some situations, there are ways like matching to reduce model dependence).
 
 ## From simulations to standard errors
 
-Now, what's left is to quantify this idea. Remember that the idea of expressing uncertainty about our estimates as a thought experiment of "How would my estimate vary, if I could draw a million samples?" is pure fiction! It is an epistemological crutch. You always only observe one sample and need draw inferences on one sample alone. With sufficient assumptions however, we can *estimate* how much our estimates would vary *if we could replicate our sample a million times*. We will discuss this in the next section on regression basics.
+If we have only one sample, how can we use this thought experiment? Remember that the root of the idea is to expressing uncertainty about our estimates based on the question: "How would my estimate vary, if I could draw many samples?" Of course, this is only an epistemological crutch. We need to draw inferences on one sample alone. With sufficient assumptions however, we can *estimate* how much our estimates would vary *if we could replicate our sample a million times*. We will discuss this in the next section on regression basics.
 
 
 # Excercises

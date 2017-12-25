@@ -3,16 +3,16 @@ title: 'Quantitative Methods -- Day 1: Regression Basics'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  word_document:
-    toc: yes
   html_notebook:
     code_folding: none
     number_sections: yes
     toc: yes
-  pdf_document:
-    toc: yes
   html_document:
     df_print: paged
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document:
     toc: yes
 bibliography: ../literature/bibliography.bib
 ---
@@ -36,15 +36,15 @@ This is a very nice description of what a linear regression is, but it might be 
 ```{r}
 set.seed(123)  # fix the random number generator
 x <- rnorm(100, 10, 5)  # draw 100 numbers randomly from a normal distribution
-y <- 2 + 3 * x - 0.5*x^2 + rnorm(100, 0, 20)  # create a new variable y as linear additive function of x
+y <- 2 + 3 * x - 0.5*x^2 + rnorm(100, 0, 20)  # y as linear additive function of x
 plot(x, y,  # plot x vs y (draws points by default)
      col=darkblue,  # color of the points
      pch=16,  # point character, 16 is a small dot
      xlab="Subpopulations defined by different values of 'x'",
      ylab="Outcome")  
-chosen_sub_population <- x[rank(x) %% 10 == 0]  # keep the 10th highest, 2th highest, etc. value 
+chosen_sub_population <- x[rank(x) %% 10 == 0]  # keep the 10th highest, 2th highest, etc.
 y_ticks <- 2 + 3 * chosen_sub_population - 0.5 * chosen_sub_population^2
-points(chosen_sub_population, y_ticks, col="red", pch=20)  # adds the average y in red for evey ticks value
+points(chosen_sub_population, y_ticks, col="red", pch=20)  # adds average y for evey ticks value
 ```
 
 Think about the $x$ dimension as a continuum of groups. People/firms/observations with a low value of $x$ belong to a different group (sub-population) than observations with a high value of $x$. The regression function describes how the outcome $y$ changes "on average" as we move from one group to the next.
@@ -55,14 +55,14 @@ This becomes even more obvious with "categorical" $x$ rather than continuous $x$
 set.seed(123)  # fix the random number generator
 age_range <- 16:24
 age <- sample(x=age_range, size=100, replace=TRUE)  # draw 100 integers randomly
-y <- 2 + 3 * age - 0.5*age^2 + rnorm(100, 0, 20)  # create a new variable y as linear additive function of x
+y <- 2 + 3 * age - 0.5*age^2 + rnorm(100, 0, 20)  # y as linear additive function of x
 plot(age, y,  # plot x vs y (draws points by default)
      col=darkblue,  # color of the points
      pch=16,  # point character, 16 is a small dot
      xlab="Subpopulations defined by different values of 'age'",
      ylab="Outcome")  
 y_ticks <- 2 + 3 * age_range - 0.5 * age_range^2
-points(age_range, y_ticks, col="red", pch=20)  # adds the average y in red for evey ticks value
+points(age_range, y_ticks, col="red", pch=20)  # adds average y for evey ticks value
 ```
 
 But even if $x$ is continuous, the idea applies: a regression is way to describe how the average of an outcome changes going from one group of observations to another. It is a tool to reason about determinants of averages!
@@ -71,9 +71,9 @@ But even if $x$ is continuous, the idea applies: a regression is way to describe
 
 # Conditional Expectations
 
-> A substantial portion of research in econometric methodology can be interpreted as finding ways to estimate conditional expectations in the numerous settings that arise in economic applications. ... we are interested in the e¤ect of a variable w on the expected value of y, holding fixed a vector of controls, c. The conditional expectation of interest is $E[y|w, c]$, which we will call a **structural conditional expectation.** (@Wooldridge.2010, p. 13)
+> A substantial portion of research in econometric methodology can be interpreted as finding ways to estimate conditional expectations in the numerous settings that arise in economic applications. ... we are interested in the effect of a variable $w$ on the expected value of $y$, holding fixed a vector of controls, $c$. The conditional expectation of interest is $E[y|w, c]$, which we will call a **structural conditional expectation.** (@Wooldridge.2010, p. 13)
 
-A conditional expectation is nothing more than the expected average $y$ given what you know about $x_i$ (or $w_i$ in @Wooldridge.2010) and $c_i$ and what know about the relation between the variables. This structural conditional expectation is essentially your assumed model of the links between $y$ and $x$ and $c$. It can be detailed -- up to assuming a certain functional form and placing restrictions on the coefficients -- or it can be rather vague. And as we will discuss in the latter parts of this course: That expectation can be uncertain to different degrees. 
+A conditional expectation is nothing more than the expected average $y$ given what you know about $x_i$ (or $w_i$ in @Wooldridge.2010), control variable(s) $c_i$, and what we know about the relation between all variables. This structural conditional expectation is essentially your theory -- your assumed model of the links between $y$ and $x$ and $c$. It can be detailed -- up to assuming a certain functional form and placing restrictions on the coefficients -- or it can be rather vague. And as we will discuss in the latter parts of this course: That expectation can be uncertain to different degrees. 
 
 Let's look at the simple *linear* example. Of course, there are also non-linear versions and generalized linear models. We will talk about them later. For now, let's try to grasp the motivation behind the most common form: the simple linear regression.
 
@@ -119,6 +119,8 @@ As you can see the "conditional expectation" is a regression plane. The plane gi
 
 # OLS and Conditional Expectation
 
+## The link between ols and conditional expectations
+
 Let's do some quick math to show that a regression indeed gives you the conditional expectation. And why we want to know that. The most common regressions are often also called the *minimum mean square linear predictor* or the *least squares linear predictor*. What can be shown quite easily is that the conditional expectation $CE$ is the minimum mean square predictor of $y$. (See @Goldberger.1991)
 
 Assume we want to predict $y$ with $x$. We need a good prediction function. Let's say we want to minimize our prediction errors, or more specifically, our squared prediction errors: 
@@ -133,14 +135,17 @@ The inner part is a binomial formula. So:
 
 $$\underset{m\in M}{\text{minimize}}\,\, E\left[ \left(y_i - E[y|x]\right)^2 + 2 \left(y_i - E[y|x]\right) \left(E[y|x] - m(x_i)\right) + \left(E[y|x] - m(x_i)\right)^2  \right]$$
 
-The first of the three terms doesn't depend on $m(x_i)$; so this term is irrelevant for the minimization. The second is zero.
+The first of the three terms doesn't depend on $m(x_i)$; so this term is irrelevant for the minimization. The second is zero per iterated expectations ($E\left[ \left(y_i - E[y|x]\right)\right] = E[y_i] - E[y_i]$).
+
 So this is equivalent to solving
 
 $$\underset{m\in M}{\text{minimize}}\,\, E\left[ \left(E[y|x] - m(x_i)\right)^2  \right]$$ 
  
 Now, it is obvious that this term is minimized (set to zero) if $m(x_i)=E[y|x]$. So the conditional expectation function is what you should use if you want to minimize squared prediction errors. And the other way around as well. **If you are interested in the conditional expectation, minimizing mean squared prediction errors gets you there.**
 
-How does simple ordinary least squares fit in? Suppose we want to limit ourselves to linear functions out of $M$: 
+## Linear OLS as a useful approximation
+
+How does simple linear ordinary least squares fit in? Suppose we want to limit ourselves to linear functions out of $M$: 
 
 $$\beta= \underset{b}{\text{argmin}}\,\, E\left[(y_i - x'b)^2  \right]$$
 
@@ -156,7 +161,7 @@ So the OLS projection is the minimum mean squared error linear predictor of $y$.
 
 $$\beta= \underset{b}{\text{argmin}}\,\, E\left[(y_i - x'b)^2  \right] = E\left[(E[y|x] - x'b)^2  \right]  $$
 
-These are the reasons why OLS is so popular: It is the best linear approximation to an nearly always unknown $CE$. Why is that good? Because it is a "conservative" approximation if you don't know what the real $CE$ is.
+These are the reasons why OLS is so popular: It is the best linear approximation to an nearly always unknown $CE$. Why is that good? Because, in a way, it is a "conservative" approximation if you don't know what the real $CE$ is. It has the least flexibility.
 
 
 
@@ -193,6 +198,7 @@ scatter.smooth(x, y, col=darkblue, pch=16)
 # plot(x, y, col=darkblue, pch=16)
 abline(lm(y~x), col="red")
 ```
+
 Here, we simulated a non-linear relationship (and it is not even obvious from the picture). The black line is the true $CE$, the red line is the best linear approximation of the black line.
 
 
@@ -203,9 +209,9 @@ Here, we simulated a non-linear relationship (and it is not even obvious from th
 
 Consider the model: 
 
-$$y = X_1 \beta_1 + X_2 \beta_2 + u$$
+$$y = x_1 \beta_1 + x_2 \beta_2 + u$$
 
-One of the great things (and terribly confusing things) about multivariate Regressions is that the coefficients can be interpreted as the average change in $y$ while holding other variables fixed. In the above equation $\beta_1$ is the average change in $y$ for a 1-unit change in $X_1$, holding $X_2$ constant. The same goes for $\beta_2$. 
+One of the great things (and terribly confusing things) about multivariate Regressions is that the coefficients can be interpreted as the average change in $y$ while holding other variables fixed. In the above equation $\beta_1$ is the average change in $y$ for a 1-unit change in $x_1$, holding $x_2$ constant. The same goes for $\beta_2$. 
 
 Let's see this with an example:
 
@@ -218,9 +224,11 @@ summary(lm(y ~ x1))
 summary(lm(y ~ x1 + x2))
 ```
 
-The proof for why we we get this result is the **Frisch-Waugh-Lovell Theorem**.
+First, think a bit about why we get different results for $x_1$ in these two cases.
 
-For the theorem, we first need to introduce a certain way of presenting residuals, called the residual maker matrix $M = I - X(X'X)^{-1}X'$: It is called the residual maker because if you left-multiply it to a vector, you get the residual vector:
+The mathematical proof for why we we get this result is the **Frisch-Waugh-Lovell Theorem**.
+
+For the theorem, we first need to introduce a certain way of presenting residuals, called the *residual maker matrix* $M = I - X(X'X)^{-1}X'$: It is called the residual maker because if you left-multiply it to a vector, you get the residual vector:
 
 $$My = (I - X(X'X)^{-1}X')y = y - X(X'X)^{-1}X'y = y - X\beta = u$$
 Multiplying $M$ on the left with $y$ yields the residual $u$. We need this matrix for the following proof: 
@@ -241,7 +249,7 @@ a_2 &= (\tilde{X}_2'\tilde{X}_2)^{-1}\tilde{X}_2'\tilde{y}\\
     & = (X_2'M_1X_2)^{-1}(X_2'M_1X_1\beta_1 + X_2'M_1X_2\beta_2 + X_2'M_1\hat{u})
 \end{align}
 
-There are a few things that help here, which I won't proof: $M_1'M_1=M_1$, $M_1X=0$, $M_1\hat{u}=\hat{u}$, and $X_2\hat{u}=0$. That means, the above equation simplifies, because the first and last term in the bracket are zero: 
+There are a few things that help here, which I won't prove: $M_1'M_1=M_1$, $M_1X=0$, $M_1\hat{u}=\hat{u}$, and $X_2\hat{u}=0$. That means, the above equation simplifies, because the first and last term in the bracket are zero: 
 
 $$a_2 = (X_2'M_1X_2)^{-1}(X_2'M_1X_2\beta_2) = \beta_2$$
 

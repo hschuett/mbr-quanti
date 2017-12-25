@@ -62,18 +62,18 @@ We can expand this and take a closer look why changes in $u$ affect the estimate
             & = \beta + (X'X)^{-1}X'u\\
 \end{align}
 
-Quite obviously, the estimate $\hat{\beta}$ is equal to the actual $\beta$ (if the relationship is indeed linear) plus the additional $(X'X)^{-1}u$ term. That means that in reality, we will even measure the true $\beta$. But this tells us two things:
+Quite obviously, the estimate $\hat{\beta}$ is equal to the actual $\beta$ (if the relationship is indeed linear) plus the additional $(X'X)^{-1}u$ term. That means that in reality, we will never measure the true $\beta$. But this tells us two things:
 
 If we want to be as close as possible to the true $\beta$ we would like to: 
 
 1. Hit the true $\beta$ at least on average if we could do repeated experiments
-2. Have the term $(X'X)^{-1}u$ as small as possible so that we do stray far away from the true $\beta$
+2. Have the term $(X'X)^{-1}u$ as small as possible so that we do not stray far away from the true $\beta$
 
 Regarding point one: 
 
 $$E[\hat{\beta}] = E[\beta + (X'X)^{-1}X'u]$$
 
-If $E[X'u]=0$, then $E[\hat{\beta}] = \beta$. This is sometimes called **exogeneity assumption**. We need this to hit $\beta$ at least on average. Stated another way, we need this assumption to have an *unbiased* estimator. We will talk a lot about bias in follow-on sessions.  
+If $E[X'u]=0$, then $E[\hat{\beta}] = \beta$. This is sometimes called **exogeneity assumption**. We need this to hit $\beta$ at least on average. Stated another way, we need this assumption to have an *unbiased* estimator. We will talk a lot about bias in following sessions.  
 
 The second desirable property of an estimator is low *variance*. Both *unbiasedness* and *low variance* are important. There is an incredibly nerdy [poem](../literature/Goodall-2003-Teaching_Statistics.pdf) called "Hiawatha designs an experiment", which is about a native american who learns to shoot unbiased arrows from the best statisticians in the world. Problem is that even though he would hit the target on average he sprays widely, never hits the target, and his tribe takes away his bow and arrows. 
 
@@ -160,11 +160,11 @@ Set up a *null hypothesis* and an *alternative hypothesis*. For instance, often 
 
 ## From standard errors to hypothesis testing
 
-To repeat again what we are after: we want to know is whether we can reject $H_0$. That is, whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. All the information we have to answer this question is our estimate $\hat{\beta}$ and its variance $\sigma(\hat{\beta})$. ... Or do we? Actually, we do not have this variance. That one is unknown to us too, since we cannot really do this hypothetical experiment of repeating our tests and we do not know how $E[uu'|X]$ really looks like. So we need to estimate this variance from the data too and using some assumption about $E[uu'|X]$, like the one we did above: $\hat{\sigma}(\hat{\beta})$. 
+To repeat again what we are after: we want to know whether we can safely reject $H_0$. That is, whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. All the information we have to answer this question is our estimate $\hat{\beta}$ and its variance $\sigma(\hat{\beta})$. ... Or do we? Actually, we do not have this variance. That one is unknown to us too, since we cannot really do this hypothetical experiment of repeating our tests and we do not know how $E[uu'|X]$ really looks like. So we need to estimate this variance from the data too and using some assumption about $E[uu'|X]$, like the one we did above: $\hat{\sigma}(\hat{\beta})$. 
 
-Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). One the other hand a very high magnitude estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
+Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). Similarly, a very high magnitude of the estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
 
-Remember that if you had 1000 hypothetical replications of your data and your tests you would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$ as well. Let's simulate that:
+Remember that if you had 1000 hypothetical replications of your data, youyou would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Let's simulate that:
 
 ```{r}
 set.seed(666)
@@ -183,7 +183,7 @@ hist(ratio_sim, col=rgb(0.2, 0.3, 0.4, 1), border=NA, breaks=100)
 abline(v=mean(ratio_sim),col="red")
 ```
 
-So, in this case, the true $\beta$ is 2 and we can see the ratio is around 8 on average (the estimator is reasonably precise). But we still need a benchmark. Think a bit about the following: What we actually need to know for reasoning about whether $H_0: \beta=0$ is what the above histogram would look like, if $\beta=0$.  
+So, in this case, the true $\beta$ is 2 and we can see the ratio is around 8 on average (the estimator is reasonably precise). But we still need a benchmark. Think a bit about the following: What we actually need to know for reasoning about whether $H_0: \beta=0$ is *what the above histogram would look like, if $\beta=0$.*
 
 ```{r}
 set.seed(666)
@@ -202,15 +202,14 @@ hist(ratio_sim, col=rgb(0.5, 0.3, 0.4, 1), border=NA, breaks=100)
 abline(v=mean(ratio_sim),col="red")
 ```
 
-Obviously the ratios that we would get from our hypothetical data replications would be centered around zero (because OLS is an unbiased estimator and the true beta is zero). What is more interesting is the spread of this curve. It is reasonably symmetric and most of its mass is between -2 and +2. So, a ratio of around 8 (as in the previous simulation with $\beta=2$) would be very unlikely if the true $\beta=0$. It is possible, but very very unlikely. So unlikely in fact, that we can reject $\beta=0$ in favor of $\beta \neq 0$ and be confident that the probability of us falsely rejecting $\beta=0$ being very small. 
+Obviously, the ratios that we would get from our hypothetical data replications would be centered around zero (because OLS is an unbiased estimator and the true beta is zero). What is more interesting is the spread of this curve. It is reasonably symmetric and most of its mass is between -2 and +2. So, a ratio of around 8 (as in the previous simulation with $\beta=2$) would be very unlikely if the true $\beta=0$. It is possible, but very very unlikely. So unlikely in fact, that we can reject $\beta=0$ in favor of $\beta \neq 0$ and be confident that the probability of us falsely rejecting $\beta=0$ is very small. 
 
-But, at which magnitude of this ratio should we start saying that $\beta=0$ becomes very unlikely? We would like to know the probability of making an error if we decide to reject $H_0$. Something like, "if my estimated ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$ is 8 and I reject $\beta=0$ then the chance of making an error because $\beta$ truly is null is p%". Notice that we could do this simply from the red histogram above. Similarly, if we would know what *ditribution* the estimated ratios follow if $\beta=0$, we could calculate that probability. And with some assumptions we can figure this out. 
-
-We won't go into the derivations here, you can read them up in any econometric text book. But assuming xxx it is easy to show that our estimate $\hat{\beta}$ is normally distributed with:
+But, at which magnitude of this ratio should we start saying that $\beta=0$ becomes very unlikely? We would like to know the probability of making an error if we decide to reject $H_0$. Something like, "if my estimated ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$ is 8 and I reject $\beta=0$, then the chance of making an error because $\beta$ truly is null is p%". Notice that we could do this simply from the red histogram above. Similarly, if we would know what *ditribution* the estimated ratios follow if $\beta=0$, we could calculate that probability. And with some assumptions we can figure this out. 
+We won't go into the derivations here, you can read them up in any econometric text book. But assuming normally distributed errors, it is easy to show that our estimate $\hat{\beta}$ is normally distributed with:
 
 $$\hat{\beta}\sim N\left(\beta,\, \sigma^2(X'X)^{-1}\right)$$
 
-If we knew $\sigma$ We would be done already. Per rules for normal distributions, if you subtract the mean and scale a normally distributed random variable by its standard distribution, you get the standard normal distribution:
+If we knew $\sigma$, we would be done already. Per rules for normal distributions, if you subtract the mean and scale a normally distributed random variable by its standard distribution, you get the standard normal distribution:
 
 $$\hat{\beta}\sim N\left(\beta,\, \sigma^2(X'X)^{-1}\right) \rightarrow \frac{\hat{\beta} - \beta_0}{\sigma(\beta)} \sim N(0, 1)$$
 
@@ -267,7 +266,7 @@ As you can see, random draws from the t-distribution fits our simulated ratios v
 pt(q=8, df=n-2)
 ```
 
-Well (due to rounding) the probability of seeing a value of 8 or less is 1. Let's do something more classic: Let's compute the probability of seeing a t-value of 2 or less:
+Well, (due to rounding) the probability of seeing a value of 8 or less is 1. Let's do something more classic: Let's compute the probability of seeing a t-value of 2 or less:
 
 ```{r}
 # using the t-probability function to compute the prob
@@ -289,10 +288,5 @@ For a lot of more complicated situations, where we need different assumptions an
 1. $E[uu'|X] = \sigma^2I$ (homoscedasticity)
 
 Most of the problems here are finding asymptotically converging distributions for the cases where we don't want to assume homoscedasticity. Which is basically consistent with assuming that there are unmeasured influences left, but we have some idea about how the affect the behavior of the error term. We will talk more about that in a later session.
-
-# Examples
-
-
-
 
 # References
