@@ -20,7 +20,7 @@ library(stargazer)
 
 > Regression discontinuity analysis is an approach dealing with this extreme case of lack of overlap in which the assignment mechanism is clearly defined. @Gelman.2007, p. 212.
 
-Sometimes we have situations where a pre-treatment variable $x$ that completely determines treatment. In particular, think of a regulation that kicks in after $x$ has reached a certain value. For example a reporting regulation that only applies to firms with a size $x$ greater than some value $C$. So, we know exactly what determines the treatment. On the other hand, this also means, that we have complete lack of overlap for the $x$ that causes treatment and likely also affect the outcome $y$.
+Sometimes we have situations where a pre-treatment variable $x$ completely determines treatment. In particular, think of a regulation that kicks in after $x$ has reached a certain value. For example a reporting regulation that only applies to firms with a size $x$ greater than some value $C$. So, we know exactly what determines the treatment. On the other hand, this also means, that we have complete lack of overlap for the $x$ that causes treatment and likely also affect the outcome $y$.
 
 In such a setting we can only perform a causal analysis in a region around $C$ and only if we are willing to assume that the regression function ($E[y|x]$) is a continuous function near $C$. In this case we have the advantage that we know the assignment mechanism, so we know exactly our confounders. But the disadvantage is that since there is no overlap, we must extrapolate much more what the counterfactuals might look like. And to mitigate such extrapolations, we usually restrict out attention to a small range around $C$, where we can reasonably assume that $E[y^0|x]$ would be very similar before and after $C$. Here is why:
 
@@ -143,13 +143,13 @@ For comparisons, this is the Stata code for table5.do on the dataverse site:
 Let's load the data
 
 ```{r}
-raw_graders4 <- haven::read_dta("../data/final5.dta")
-raw_graders4 <- haven::zap_formats(raw_graders4)
+raw_graders5 <- haven::read_dta("../data/final5.dta")
+raw_graders5 <- haven::zap_formats(raw_graders5)
 ```
 
 Filter the data
 ```{r}
-graders4 <- raw_graders4 %>% 
+graders5 <- raw_graders5 %>% 
   mutate(avgverb = if_else(avgverb > 100, avgverb-100, avgverb),
          avgmath = if_else(avgmath > 100, avgmath-100, avgmath)) %>% 
   mutate(func1 = c_size/(floor((c_size-1)/40)+1)) %>%   # note: using round instead gives crazy results
@@ -166,33 +166,33 @@ graders4 <- raw_graders4 %>%
 ## Normal OLS estimates (compare Table 2)
 
 ```{r}
-f_fit1 <- lm(avgmath ~ tipuach + classize, data=graders4)
-f_fit2 <- lm(avgmath ~ tipuach + c_size + classize, data=graders4)
-f_fit3 <- lm(avgmath ~ tipuach + c_size + c_size2 + classize, data=graders4)
+f_fit1 <- lm(avgmath ~ tipuach + classize, data=graders5)
+f_fit2 <- lm(avgmath ~ tipuach + c_size + classize, data=graders5)
+f_fit3 <- lm(avgmath ~ tipuach + c_size + c_size2 + classize, data=graders5)
 stargazer(f_fit1, f_fit2, f_fit3, type="text", omit.stat = c("f", "ser"))
 ```
 
 ## 2SLS estimates (compare Table 4)
 
 ```{r}
-frd_fit1 <- felm(avgmath ~ tipuach | 0 | (classize ~ func1) | schlcode, data=graders4)
-frd_fit2 <- felm(avgmath ~ tipuach + c_size | 0 | (classize ~ func1) | schlcode, data=graders4)
-frd_fit3 <- felm(avgmath ~ tipuach + c_size + c_size2 | 0 | (classize ~ func1) | schlcode, data=graders4)
+frd_fit1 <- felm(avgmath ~ tipuach | 0 | (classize ~ func1) | schlcode, data=graders5)
+frd_fit2 <- felm(avgmath ~ tipuach + c_size | 0 | (classize ~ func1) | schlcode, data=graders5)
+frd_fit3 <- felm(avgmath ~ tipuach + c_size + c_size2 | 0 | (classize ~ func1) | schlcode, data=graders5)
 stargazer(frd_fit1, frd_fit2, frd_fit3, type="text", omit.stat = c("f", "ser"))
 ```
 
 
 
 ```{r}
-sub_graders4 <- filter(graders4, disc == 1)
-frd_fit4 <- felm(avgmath ~ tipuach | 0 | (classize ~ func1) | schlcode, data=sub_graders4)
-frd_fit5 <- felm(avgmath ~ tipuach + c_size | 0 | (classize ~ func1) | schlcode, data=sub_graders4)
+sub_graders5 <- filter(graders5, disc == 1)
+frd_fit4 <- felm(avgmath ~ tipuach | 0 | (classize ~ func1) | schlcode, data=sub_graders5)
+frd_fit5 <- felm(avgmath ~ tipuach + c_size | 0 | (classize ~ func1) | schlcode, data=sub_graders5)
 stargazer(frd_fit4, frd_fit5, type="text", omit.stat = c("f", "ser"))
 ```
 
 
 # Remarks
 
-Of course, this is a local average treatment affect LATE.
+Of course, this is a local average treatment affect LATE. Can you exlain why?
 
 # References
