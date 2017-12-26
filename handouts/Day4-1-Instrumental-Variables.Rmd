@@ -71,7 +71,7 @@ plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
 
 An instrumental variable is a variable that:
 
-1. Non-zero association between $IV$ and $X$.
+1. Has non-zero association between $IV$ and $X$.
 1. Only affects $Y$ through $X$ (exclusion restriction).
 1. Is independent of $W$, possibly after conditioning on other predictors. (Ignorability of the instrument)
 
@@ -81,7 +81,7 @@ If these points are given, "random variation" in $IV$ causes random variation in
 
 Let's take an example out of @Gelman.2007, pp. 216 to illustrate. This is a randomized-encouragement design. Suppose, we want to estimate the causal effect of watching Sesame Street on letter recognition. Think of a randomized experiment with pre-school children. The treatment $T$ is watching Sesame Street, the control is not watching. The outcome is the score on a test of letter recognition. 
 
-Of course, it is not possible to force children to watch a show and whether the watch or not might be related to a confounding variable that also effects letter recognition (such as curiosity maybe.) But, if watching cannot be randomized, what can we do? We can randomize encouragement to watch. Remember an instrument is a variable thought to "randomly" induce variation in the treatment of interest. Of course, we hope that encouragement actually works (point 1: encouragement is associated with actually watching Sesame Street). But that is something we can reasonably check in the data. 
+Of course, it is not possible to force children to watch a show and whether they watch or not might be related to a confounding variable that also effects letter recognition (such as curiosity maybe.) But, if watching cannot be randomized, what can we do? We can randomize encouragement to watch. Remember an instrument is a variable thought to "randomly" induce variation in the treatment of interest. Of course, we hope that encouragement actually works (point 1: encouragement is associated with actually watching Sesame Street). But that is something we can reasonably check in the data. 
 Let's load the data and check:
 
 ```{r}
