@@ -17,10 +17,53 @@ library(ggplot2)
 
 > The problem is that regression is like a demon or djinn from folktale. It answers exactly that question that you asked it. Often you don't realize though that you asked the wrong question ~ paraphrasing Richard McElreath
 
+# Interactions
+
+Often you see something that is called an interaction in regressions: 
+
+$$y_i = a_0 + a_1 x_i + a_2 d_i + a_3 x_i c_i + u_i$$
+
+where $d_i$ is a dummy variable that separates the sample observations into two groups and only takes on one of two values: either a 1 if it belongs to group one and 0 if it belongs to the other group.
+
+The purpose of such creating such a dummy variable and fitting a regression as the one above is to: 
+
+1. Allow for different regression slopes for each group.
+1. Provide and easy test for whether the difference between slopes is statistically significant. 
+
+```{r}
+set.seed(2345)
+n <- 100
+cblue <- rgb(0.2, 0.3, 0.4, 0.8)
+d <- rbinom(n=n, size=1, prob=0.5)
+x <- rnorm(n=n, mean=3, sd=1)
+u <- rnorm(n=n, mean=0, sd=1)
+y <- ifelse(d == 1, 
+            1 + 2 * x + u,
+            4 - 0.5 * x + u)
+par(mfrow=c(1,2))
+# just the points
+plot(x, y, col=cblue, pch=20)
+# showing group 1 and group 2
+plot(x, y, col=cblue, pch=20)
+curve(1 + 2 * x, from=0, to=6, add=TRUE, col="red")
+curve(4 + -0.5 * x, from=0, to=6, add=TRUE, col="red")
+```
+
+How would this look like in a regression? 
+
+```{r}
+summary(lm(y ~ x*d))
+```
+
+The coefficient on $x$ is the coefficient for $d=0$. It is pretty close to the true -0.5. $x:d$ is the **difference** between the slopes. This is because if $d=1$ then one additional unit of $x$ adds the -0.5837 and 2.7850 units of $y$ on average. If you add these, you get close to the slope of 2 that is correct for group 1. Similarly the intercept is the intercept for group 1 (which is 4) and Intercept plus the coefficient on $d$ is the intercept for group 1 (in this case, our estimate is not very good. 4.1914  + -4.0203 is close to zero whereas the true intercept is 1).
+
+We will see interactions everywhere, so make sure you understand the rationale and interpretation. 
+
+
 
 # Colinearity
 
-$x$-variables are almost always correlated with each other. This makes coefficient estimates less precise. The extreme is variables which are perfectly correlated. That is equivalent to saying that one variable is a linear function of one or more of the remaining variables. In that case, OLS breaks down because you cannot compute the inverse $(X'X)^{-1}$ anymore. But it is also not surprising that it breaks down. If one variable is a linear function of other variables, then the same must go for its coefficient. That one should also be a linear function of the other coefficients. That means there are infinitely many coefficient combinations possible, no unique solution exists and OLS breaks down. Essentially, OLS does not know which variable it should allocate the effect to. Many solutions give you the same best fit. The problem is not so severe if variables are simply correlated, but a similar problem exists. Say you have two variables $x_1$ and $x_2$. Both move in tandem quite often and with $y$. When $x_1$ goes up, so does $x_2$ and $y$. Then it is hard to figure out, whether it is $x_1$ or $y$ that is associated with $y$. Essentially OLS tries to separate the impact of $x_1$ and $x_2$ from the few observations where $x_1$ and $x_2$ do not move similarly. If that does not happen often, the estimates are more uncertain. If it never happens you have perfect co-linearity and OLS breaks down.
+$x$-variables are almost always correlated with each other. This makes coefficient estimates less precise. The extreme is variables which are perfectly correlated. That is equivalent to saying that one variable is a linear function of one or more of the remaining variables. In that case, OLS breaks down because you cannot compute the inverse $(X'X)^{-1}$ anymore. But it is also not surprising that it breaks down. If one variable is a linear function of other variables, then the same must be true for its coefficient -- one should also be a linear function of the other coefficients. This means there are infinitely many coefficient combinations possible, no unique solution exists and OLS breaks down. Essentially, OLS does not know which variable it should allocate the effect to. Many solutions give you the same best fit. The problem is not so severe if variables are simply correlated, but it makes the allocation "less certain" Say you have two variables $x_1$ and $x_2$. Both move in tandem quite often and with $y$. When $x_1$ goes up, so does $x_2$ and $y$. Then it is hard to figure out, whether it is $x_1$ or $y$ that is associated with $y$. Essentially OLS tries to separate the impact of $x_1$ and $x_2$ from the few observations where $x_1$ and $x_2$ do not move similarly. If that does not happen often, the estimates are more uncertain because you have essentially a small sample size with different movements. If it never happens you have perfect co-linearity and OLS breaks down.
 
 What this means in practice is that our $\hat{\beta}$ are less precisely estimated (we are more likely to get extreme estimates) and high standard errors. Remember the representation of our estimates:
 
@@ -65,21 +108,21 @@ summary(fit_b)
 # Measurement Error
 
 ## The problem
-A general problem you should be aware of is measurement error. Many of our constructs and concepts (sentiment, earnings quality, risk aversion, ability, financial constraints, marginal tax rate, happiness, customer satisfaction,etc.) are unobservant or hard to measure. We can try to find or create proxies. However, these will invariably measure our construct of interest with error. Think about all the textual analysis measures for sentiment, readability etc. For example, using the number of negative words as a measure of text tone. Obviously, this will not capture every nuance; it will contain significant measurement error of the real tone of the text. 
+A general problem you should be aware of is measurement error. Many of our constructs and concepts (sentiment, earnings quality, risk aversion, ability, financial constraints, marginal tax rate, happiness, customer satisfaction,etc.) are unobserved or hard to measure. We can try to find or create proxies. However, these will invariably measure our construct of interest with error. Think about all the textual analysis measures for sentiment, readability etc. For example, using the number of negative words as a measure of text tone. Obviously, this will not capture every nuance; it will contain significant measurement error of the real tone of the text. 
 
-Depending on the amount of measurement error, proxies are like a broad sword as compared to a scalpel. It is fine for research questions where you are after broad effects. But you have to be careful with questions that require a scalpel. In those cases, you really need to be concerned about measurement error. 
+Depending on the amount of measurement error, proxies are like a broad sword as compared to a scalpel. It is fine for research questions where you are after broad effects. But you have to be careful with questions that require a scalpel. In those cases, you absolutely need to be concerned about measurement error. 
 
 ## Mathematical presentation of the problem
 
 There is a good treatment in @Wooldridge.2010 pp.70. The following is a short summary.
 
-Imagine a regression of the form $y = a_0 + a_1 x_1 + a_2 x_2 + a_3 x^*_3 + u$, but we cannot observe $x^*_3$. But we have a measure $x_3$. For example, think of $x^*_3$ as happiness and $x_3$ as a measure derived from survey questions. 
+Imagine a regression of the form $y = a_0 + a_1 x_1 + a_2 x_2 + a_3 x^*_3 + u$, but we cannot observe $x^*_3$. Instead, we have a measure $x_3$. For example, think of $x^*_3$ as happiness and $x_3$ as a measure derived from survey questions. 
 
 We assume $x_3$ measures $x^*_3$ with error $e_3 = x_3 - x^*_3$. We substitute this equation into the above formula and get:
 
 $$y = a_0 + a_1 x_1 + a_2 x_2 + a_3 x_3 + (u - a_3e_3)$$
 
-The measurement error moves into the error term. Because the measurement error lurks in the error term, you get something very similar to a correlated omitted variables problem, if the measurement error is correlated with $x_3$. In quite a few cases this is the case. 
+The measurement error moves into the error term. Because the measurement error lurks in the error term, you get something very similar to a correlated omitted variables problem, if the measurement error is correlated with $x_3$. In quite a few cases this is likely. 
 
 Let's assume the average measurement error is zero $E[e_3]=0$ (not a very consequential assumption because of the intercept in our regressions). The **classical errors-in-variables (CEV)** assumption is that the measurement error is uncorrelated with the true unobserved variable:
 
@@ -91,15 +134,7 @@ $$cov(x_3, e_3) = E[x_3e_3] = E[(x^*_3+e_3)e_3] = E[x^*_3e_3] + E[e^2_3] = \sigm
 
 since $E[x^*_3e_3] = 0$ by the CEV assumption. Thus $cov(x_3, e_3)=\sigma^2_{e_3}$ the variance of the measurement error. Now, because the measurement error lurks in the error term, you get something very similar to a correlated omitted variables problem. The correlation of $x_3$ with the error term is thus $-a_3\sigma^2_{e_3}$.
 
-In this case the regression of $y$ on $x_1$, $x_2$, and $x_3$ and $x^*_3$ is correlated with the other variables in the regression, we generally have inconsistent estimators of **all** estimators of all coefficients and it is hard to figure out the bias. if $x^*_3$ is uncorrelated with $x_1$ and $x_2$ then so is $x_3$. Then only $a_3$ is inconsistent. The bias for $a_3$ is **always an attenuation bias** because the correlation of $x_3$ with the error term is thus $-a_3\sigma^2_{e_3}$
-
-## Examples
-
-colGPA ¼ b0 þb1 famincþb2hsGPAþb3SAT þv 
-
-## Excercises
-
-1. What happens if we assume the flip-side of the CEV?
+In this case, the regression of $y$ on $x_1$, $x_2$, and $x_3$, we generally have inconsistent estimators of **all** estimators of all coefficients if $x^*_3$ is correlated with the other variables in the regressio. Then, it is hard to figure out the bias. if $x^*_3$ is uncorrelated with $x_1$ and $x_2$, then so is $x_3$. Then only $a_3$ is biased. The bias for $a_3$ is **always an attenuation bias** because the correlation of $x_3$ with the error term is $-a_3\sigma^2_{e_3}$
 
 
 

@@ -3,12 +3,12 @@ title: 'Quantitative Methods -- Day 2: Identifcation'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
   html_notebook:
     code_folding: none
     number_sections: yes
+    toc: yes
+  html_document:
+    df_print: paged
     toc: yes
 bibliography: ../literature/bibliography.bib
 ---
@@ -27,14 +27,16 @@ library(tibble)
 
 > "Neatly dividing associations into their causal and spurious components is the task of identification analysis. A causal effect is said to be identified if it is possible, with ideal data (infinite sample size and no measurement error), to purge an observed association of all noncausal components such that only the causal effect of interest remains." -- [@Elwert.2014, p. 33] 
 
-Remember the material from day 1. We are usually interested in the conditional expectation function. That is essentially a prediction problem. However, whenever we design an empirical study, ideally we would like to make a **causal** claim. For example, we would like to test whether more transparent corporate disclosure *leads* to lower cost-of-capital (spoiler: it depends), whether tax avoidance leads to more investment, restructuring efforts increase firm value if accompanied by employee motivational interventions, etc. Most often we won't be able to do that, but this is the goal that we want to get as close as we can. 
+Remember the material from day 1. When we discussed regression basics, we said that we are usually interested in the conditional expectation function. That is essentially a prediction problem. However, whenever we design an empirical study, ideally we would like to make a **causal** claim. For example, we would like to test whether more transparent corporate disclosure *leads* to lower cost-of-capital (spoiler: it depends), whether tax avoidance leads to more investment, restructuring efforts increase firm value if accompanied by employee motivational interventions, etc. Most often we won't be able to do that, but this is the goal that we want to get as close as we can. 
+
+This fits exactly into our discussion of day 1, depending on how you think about what a causal effect is. If you think of a "causal effect" as the *true* conditional expectation function, then we can continue where we stopped in day 1. This is similar to the idea, that there is a **true data generating process** (DGP) (also sometimes called *structural model* I think. Not quite sure if these two terms are completely exchangable) that we don't know. But we try to learn about it via theory building and empirical testing. Once we have a theory about the true DGP, we can talk about what we need to do to identify it.
 
 ## Identification and Theory
 > **"Identification analysis requires a theory (i.e., a model or assumptions) of how the data were generated."** [@Elwert.2014, p. 33] 
 
-The above quote cannot be underestimated in its importance. With theory, we usually mean all the assumptions you have about how the data was generated. Another important thing to realize is that you always make such assumptions when you perform an analysis. For example, the way you define variables, which variables you include into a regression equation, whether you use clustered standard errors, etc. Any empirical method choice you make corresponds to certain assumptions about how the data came to pass. As such you implicitly lay out a theory of the data generating process, even if you weren't aware of it. In fact, most low-quality empirical work can probably be characterized by either weak underlying theory, questionable statistical procedures or both. The simple reason is that if you don't have thought a while about the underlying data generating process, you don't really have a good grasp of the hypotheses you want to test, are more likely to make wrong assumptions, and are less aware of issues you need to address in your research design. 
+The above quote cannot be underestimated in its importance. With theory, we usually mean all the assumptions you have about how the data was generated. Another important thing to realize is that you always make such assumptions when you perform an analysis. For example, the way you define variables, which variables you include into a regression equation, whether you use clustered standard errors, etc. Any empirical method choice you make corresponds to certain assumptions about how the data came to pass. As such you implicitly lay out a theory of the data generating process, even if you weren't aware of it. In fact, most low-quality empirical work can probably be characterized by either weak underlying theory, questionable statistical procedures or both. The simple reason is that if you haven't thought a while about the underlying data generating process, you don't really have a good grasp of the hypotheses you want to test, are more likely to make wrong assumptions, and are less aware of issues you need to address in your research design. (This is also true for the potential outcomes framework of causal thinking, which we will talk about in a later session. This is an alternative way of framing the problem, where you reason about an assignment mechanism instead about the data generating process)
 
-Unfortunately, as you all now, theories can never be fully tested or confirmed. Most of your assumptions will always remain assumptions. Some are more plausible, some have a 99.99\% chance of being correct, and others are more contestable. If you paid close attention in research seminars for instance, then you will have probably noticed that a big part of discussions in research seminars is about underlying assumptions. "What if your main effect is correlated with xyz?" Most assumptions are debatable and it is your job to defend why you chose them. It is your job to express your theory explicitly for other scholars to inspect and judge. In recent years, researchers in the social sciences have found DAGs (Directed acyclical graphs) very useful for that purpose. It is a nice and intuitive way to argue about the data-generating model.
+Unfortunately, as you all now, theories can never be fully tested or confirmed. Most of your assumptions will always remain assumptions. Some are more plausible, some have a 99.99\% chance of being correct, and others are more contestable. If you paid close attention in research seminars for instance, then you will have probably noticed that a big part of discussions in research seminars is about underlying assumptions. "What if your main effect is correlated with xyz?" Most assumptions are debatable and it is your job to defend why you chose them. Ideally, you can find a setting and devise a test that let's you get away with as few assumptions as possible. But there will always be some and it is your job to express your theory explicitly for other scholars to inspect and judge. In recent years, researchers in the social sciences have found DAGs (Directed acyclical graphs) very useful for that purpose. It is a nice and intuitive way to argue about the data-generating model.
 
 ## Graph Theory to Reason about Identification Tactics
 > "DAGs encode the analyst’s qualitative causal assumptions about the data-generating process in the population." -- [@Elwert.2014, p. 35] 
@@ -42,12 +44,12 @@ Unfortunately, as you all now, theories can never be fully tested or confirmed. 
 The following structure of directed acyclic graphs (DAGs) is based on @Pearl.2009. A nice survey for social scientists is @Elwert.2013. Such DAGS have only a few key elements:
 
 1. Each *node* or point on it represents a random variable (observed or unobserved). Unobserved variables are sometimes marked with a hollow dot. It doesn't matter how the variables are distributed. 
-1. Arrows (*edges*) represent **assumed** direct causal effects. That why we use arrows, causal effects always have a direction (even if it is assumed). And because they reflect directed effects and the future cannot cause the past, these graphs cannot have circles. 
+1. Arrows (*edges*) represent **assumed** direct causal effects. That why we use arrows, causal effects always have a direction (which is assumed). And because they reflect directed effects and the future cannot cause the past, these graphs cannot have circles. If you have one, you made a logical error somewhere.
 1. **Missing** arrows means you assume that no direct causal link exists. This is sometimes the most debatable assumption. In econometrics we also call this an exclusion restriction. You will find that you need those in order to do any kind of identification -- if everything determines everything, there is no sense in trying to identify isolated links. 
 
 A full graph is for a lot of purposes sufficient description of your assumed theory. You can go even further and turn this into a probabilistic graph to estimate Bayesian Networks, but we won't go there. We just use this as a way of communicating theory amongst us. 
 
-Let's look at the following figure as an example of a generic theory. Say we have a research question where we are interested in estimating the *causal* link between a variable *T* (it has become standard practice to call the main variable of interest the *treatment* for reasons we discussed before) and a outcome *Y*:
+Let's look at the following figure as an example of a generic theory. Say we have a research question where we are interested in estimating the *causal* link between a variable *T* (it has become standard practice to call the main variable of interest the *treatment* for reasons we discus later) and a outcome *Y*:
 
 ```{r}
 Nodes <- tribble(
@@ -79,17 +81,17 @@ plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
 This graph is a toy example of a theory (unobserved variables are labeled with a white dot). The theory says:
 
 1. There are (only) 5 variables in all that need to be considered to understand the link between *T* and *Y*. 
-1. It doesn't say that there aren't more determinants of *Y* (or *T* for that matter). But it explicitly says that they can be ignored, if we care only about the link between *T* and *Y*. All the other determinants of *Y* are not crucial (e.g., in a regression they represent the "random" error term).
+1. It doesn't say that there aren't more determinants of *Y* (or *T* for that matter). But it explicitly says that they can be ignored, if we care only about the link between *T* and *Y*. All the other determinants of *Y* are not crucial (e.g., in a regression they represent the "random" error term). Sometimes, the error term is explicitely included. 
 1. There are two **causal** paths from *T* to *Y*: 
     - *T* -> *Y* (a direct effect)
     - *T* -> *Z* -> *Y* (an effect mediated through a mediating variable *Z*)
-1. There are two **non-causal** paths between *T* and *Y*. Those are the key issues. If we cannot address them, we cannot identify a causal link between *T* and *Y*:
+1. There are two **non-causal** paths between *T* and *Y*. Those are the key **identification** issues. If we cannot address them, we cannot identify a causal link between *T* and *Y*:
     - *T* <- *X* <- *V* -> *Y*  (an unobserved confounder that drives variation in *T* and *Y*)
     - *T* -> *Z* <- *V* -> *Y*  (the confounder also affects the mediating variable *Z*)
 
-So, it should be apparent that the key thing is to reason about *paths*. **Causal paths** are those were the the arrows always point away from the treatment and towards the outcome. The total treatment effect is then the set of all causal paths. However, correlation is not causation, as we all no. And non-causal paths also induce correlation between *T* and *Y*. Which is why we care about them. In a way you can think about the identification problem as taking the correlation between *T* and *Y* and scrubbing it from all correlation that is induced by non-causal paths. What is left is the correlation from causal paths and only then can we interpret the correlation in our sample (e.g.,  regression coefficients) as indicating a causal effect.
+So, it should be apparent that one nice way of reasoning about causality is to reason about *paths*. **Causal paths** are those were the the arrows always point away from the treatment and towards the outcome. The total treatment effect is then the set of all causal paths. However, correlation is not causation, as we all no. And non-causal paths also induce correlation between *T* and *Y*. Which is why we care about them. In a way you can think about the identification problem as taking the correlation between *T* and *Y* and scrubbing it from all correlation that is induced by non-causal paths. What is left is the correlation from causal paths and only then can we interpret the correlation in our sample (e.g.,  regression coefficients) as indicating a causal effect.
 
-In the case above, we cannot hope to identify a causal effect of *T* on *Y* unless we find a way to get rid of the influence of *U*. In fact, "... all non-parametric identification problems can be classified as one of three underlying problems: over-control bias, confounding bias, and endogenous selection bias." [@Elwert.2014, p. 32]. And all three are can be characterized as arising from non-causal pathways. 
+In the case above, we cannot hope to identify a causal effect of *T* on *Y* unless we find a way to get rid of the influence of *V*. In fact, "... all non-parametric identification problems can be classified as one of three underlying problems: over-control bias, confounding bias, and endogenous selection bias." [@Elwert.2014, p. 32]. And all three are can be characterized as arising from non-causal pathways. 
 
 Pretty much 70\% of the remainder of this course is about different methods of how to deal with non-causal pathways. The rest is estimation techniques. If variables are observable, *conditioning* on selected variables can go a long way in blocking non-causal paths. Condition is a bit of a catch-all term, but it is an important concept. "conditioning refers to introducing information about a variable into the analysis by some means. In sociology, conditioning usually takes the form of controlling for a variable in a regression model, but it could also take the form of stratifying on a variable, performing a group-specific analysis (thus conditioning on group membership), or collecting data selectively (e.g., excluding children, prisoners, retirees, or non-respondents from a survey)."" [@Elwert.2014, p. 35]. If you condition on the wrong variables however, you can **induce** non-causal correlation (e.g., by including certain post treatment variables in your regression). This is the cause of endogenous selection bias, which we will talk about in great length later.
 
@@ -123,7 +125,7 @@ plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
      vertex.label.degree=c(-pi/2,pi/2, 0, -pi/2))
 ```
 
-This is the most critical identification problem in social sciences. If you are interested in the relation between X and Y, but do not control for W, you get what is called an omitted correlated variable bias or confounding bias. The intuition is simply that whatever you have measured as the relation between X and Y could also simply be W affecting both. In the canonical wages example: If you measure the returns to one year of education being 8\%, is that because this is really the returns to better education? Or is it a premium for being more able, where ability also increase years of education? (ability being W in this example). Another example is strategic reporting where unobservable firm fundamentals affect both the decision what to report but also the reaction to the report.
+This is the most critical identification problem in social sciences. If you are interested in the relation between X and Y, but do not control for W, you get what is called an omitted correlated variable bias or confounding bias. The intuition is simply that whatever you have measured as the relation between X and Y could also simply be W affecting both. In the canonical wages example: You measure the returns to one year of education and find an effect of 8\%. Now, is that because this is really the returns to better education? Or is it a premium for being more able, where ability also increase years of education? (ability being W in this example). Another example is strategic reporting where unobservable firm fundamentals affect both the decision what to report but also the reaction to the report.
 
 ## Mathematical Derivation
 
@@ -138,11 +140,11 @@ Then the exogeneity assumption $E[xe]=0$ for an unbiased estimator is not true! 
 
 $$E[\hat{b}] = E[b + (X'X)^{-1}X'e]$$
 
-Very imply put, assume 
+Very simply put, assume 
 
 $$y = a_0 + a_1 x_1 + a_2 x_2 + \dots + a_kx_k + \delta v + u$$
 
-$v$ is an unobserved determinant of $y$ and also correlated with $x_1$. Let's rewrite the correlation as $q = p_0 + p_1 x_1 + w$. Then we can simply put this into the above formula to see what $x_1$ picks up if $q$ is not included into the regression: 
+$v$ is an unobserved determinant of $y$ and also correlated with $x_1$. Let's rewrite the correlation as $q = p_0 + p_1 x_1 + w$. Then, we can simply put this into the above formula to see what $x_1$ picks up if $q$ is not included into the regression: 
 
 \begin{align}
   y &= (a_0 + p_0) + (a_1 + \delta p_1) x_1 + a_2 x_2 + \dots + a_kx_k + (\delta w + u)\\
@@ -199,13 +201,13 @@ plot(graph_from_data_frame(vertices=Nodes, d=Edges, directed=TRUE),
 
 In such a scenario (we assume) that there exists a mediating variable. Something that is affected by the *treatment* (*X*) and changes the outcome *Y* as a result. In this scenario, *X* changes *Y* in two ways: (1) via a direct effect and (2) via a detour through the mediator (*M*).  
 
-Now what happens if you put the Mediator into the regression? 
+Now what happens if you put the mediator into the regression? 
 
 $$Y = a_0 + a_1X + a_2W+a_3M+u$$
 
 This is called **conditioning on a post-treatment outcome** and it is actually often a bad idea, because reality is usually not as simple as the assumed relations above. Let's discuss why and learn more about regression and inference.
 
-First of all, why would you want to put *M* in here? Actually, one sees this quite often, especially in older studies where quite frankly most applied people weren't aware of this problem. The main reason you see this is if researchers want to see whether a mediator exists and what the *direct* effect of *X* is on *Y*. And in the scenario above you can actually do this. 
+First of all, why would you want to put *M* in here? Actually, one sees this quite often, especially in older studies where quite frankly most applied people weren't aware of this problem. The main reason you see this is if researchers want to see whether a mediator exists and want to estimate what the *direct* effect of *X* is on *Y*. And in the scenario above you can actually do this. 
 
 Unfortunately, quite often, theory and/or common sense suggest that we have a different situation: 
 
@@ -302,7 +304,8 @@ The preceding discussion should have highlighted a few things:
 
 1. You need theory of some sort for sound empirical analysis: Only theory can help you make sound assumptions about how the causal graph could look like. 
 1. You need to be very careful with post-treatment variables. Only include them if you really need to separate effects. 
-1. Be very careful if you are after mediator or direct effects, in some cases you might actually be better of resorting to structural equation models (which, we will take a quick glance at in the last section).
+1. Be very careful if you are after mediator or direct effects, in some cases you might actually be better of resorting to structural equation models (which, we don't have time to discuss).
+1. If you only have weak theory, you can only reasonably identify broad average effects and need a good setting to do that. 
 
 ## Excercises
 
