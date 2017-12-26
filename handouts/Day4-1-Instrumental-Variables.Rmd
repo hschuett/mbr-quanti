@@ -203,6 +203,6 @@ The standard errors calculated in most packages employing 2SLS, are based on asy
 
 # Excercises
 
-1. Go to [Joshua Angrist's dataverse site](https://dataverse.harvard.edu/dataset.xhtml?persistentId=hdl:1902.1/11288) and download the data necessary to replicate the main instrumental variable analysis in @Angrist.1998b. Describe what the main hypothesis is, what the accompanying research design core assumptions are and replicate the main regression.  
+1. Please download and read [@Bernile.2017] before class. You can find it [here](http://www.sciencedirect.com.emedien.ub.uni-muenchen.de/science/article/pii/S0304405X17303215). We will discuss the paper's assumptions, research design, and instrumental variables strategy in detail. 
  
 # References
