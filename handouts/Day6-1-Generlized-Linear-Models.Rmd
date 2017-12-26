@@ -34,7 +34,7 @@ n <- 100
 x <- runif(n=n)
 y <- rbinom(n=n, size=1, prob=x)
 
-plot(x=x, y=y, col=cbue, pch=20)
+plot(x=x, y=y, col=cblue, pch=20)
 abline(lm(y~x))
 ```
 
@@ -88,6 +88,7 @@ wells <- read.table ("../data/wells.dat")
 invlogit <- function(x) {
   return(exp(x)/(1+exp(x)))
 }
+head(wells)
 ```
 
 
@@ -136,12 +137,15 @@ jitter.binary <- function(a, jitt=.05){
 
 switch.jitter <- jitter.binary(wells$switch)
 
-plot(wells$dist, switch.jitter, xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+plot(wells$dist, switch.jitter, 
+     xlab="Distance (in meters) to nearest safe well", 
+     ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
 curve (invlogit(coef(fit.1)[1]+coef(fit.1)[2]*x), lwd=1, add=TRUE)
-points (wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+points (wells$dist, jitter.binary(wells$switch), pch=20, cex=.1, 
+        col=rgb(0.2,0.2,0.2,0.2))
 ```
 
-The line is declining, but not in a linear fashion. Thus, the change in probability for each additional 100 meters is not always the same. We need to think about how we want to evaluate this. What is often done is *evaluate the change in probability of the average firm*. We compute the distance of the average HH to the next safest well and plug this in: 
+First, Look at the spread of points above and below. The line is declining, but not in a linear fashion. Thus, the change in probability for each additional 100 meters is not always the same. We need to think about how we want to evaluate this. What is often done is *evaluate the change in probability of the average firm*. We compute the distance of the average HH to the next safest well and plug this in: 
 
 ```{r}
 mean(dist100)
@@ -172,7 +176,6 @@ hist (wells$arsenic,
       mgp=c(2,.5,0))
 ```
 
-
 And let's perform the Logistic regression with arsenic included
 
 ```{r}
@@ -186,17 +189,21 @@ Some visualizations can help us understand this better:
 
 ```{r}
 #  Graphing the fitted model with two predictors (Figure 5.11)
-plot(wells$dist, switch.jitter, xlim=c(0,max(wells$dist)), xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
+plot(wells$dist, switch.jitter, xlim=c(0,max(wells$dist)), 
+     xlab="Distance (in meters) to nearest safe well", 
+     ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
 curve (invlogit(cbind (1, x/100, .5) %*% coef(fit.3)), lwd=.5, add=TRUE)
 curve (invlogit(cbind (1, x/100, 1.0) %*% coef(fit.3)), lwd=.5, add=TRUE)
-points (wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+points (wells$dist, jitter.binary(wells$switch), pch=20, 
+        cex=.1, col=rgb(0.2,0.2,0.2,0.2))
 text (50, .27, "if As = 0.5", adj=0, cex=.8)
 text (75, .50, "if As = 1.0", adj=0, cex=.8)
 
 plot(wells$arsenic, switch.jitter, xlim=c(0,max(wells$arsenic)), xlab="Arsenic concentration in well water", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
 curve(invlogit(cbind (1, 0, x) %*% coef(fit.3)), lwd=.5, add=TRUE)
 curve(invlogit(cbind (1, 0.5, x) %*% coef(fit.3)), lwd=.5, add=TRUE)
-points(wells$arsenic, jitter.binary(wells$switch), pch=20, cex=.1)
+points(wells$arsenic, jitter.binary(wells$switch), pch=20, cex=.1,
+       col=rgb(0.2,0.2,0.2,0.2))
 text(1.5, .78, "if dist = 0", adj=0, cex=.8)
 text(2.2, .6, "if dist = 50", adj=0, cex=.8)
 
@@ -204,14 +211,16 @@ text(2.2, .6, "if dist = 50", adj=0, cex=.8)
 plot(wells$dist, switch.jitter, xlim=c(0,max(wells$dist)), xlab="Distance (in meters) to nearest safe well", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
 curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*x/100+coef(fit.3)[3]*.50), lwd=.5, add=TRUE)
 curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*x/100+coef(fit.3)[3]*1.00), lwd=.5, add=TRUE)
-points(wells$dist, jitter.binary(wells$switch), pch=20, cex=.1)
+points(wells$dist, jitter.binary(wells$switch), pch=20, 
+       cex=.1, col=rgb(0.2,0.2,0.2,0.2))
 text(50, .27, "if As = 0.5", adj=0, cex=.8)
 text(75, .50, "if As = 1.0", adj=0, cex=.8)
 
 plot(wells$arsenic, switch.jitter, xlim=c(0,max(wells$arsenic)), xlab="Arsenic concentration in well water", ylab="Pr (switching)", type="n", xaxs="i", yaxs="i", mgp=c(2,.5,0))
 curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*0+coef(fit.3)[3]*x), from=0.5, lwd=.5, add=TRUE)
 curve(invlogit(coef(fit.3)[1]+coef(fit.3)[2]*0.5+coef(fit.3)[3]*x), from=0.5, lwd=.5, add=TRUE)
-points(wells$arsenic, jitter.binary(wells$switch), pch=20, cex=.1)
+points(wells$arsenic, jitter.binary(wells$switch), pch=20, 
+       cex=.1, col=rgb(0.2,0.2,0.2,0.2))
 text(1.5, .78, "if dist = 0", adj=0, cex=.8)
 text(2.2, .6, "if dist = 50", adj=0, cex=.8)
 ```

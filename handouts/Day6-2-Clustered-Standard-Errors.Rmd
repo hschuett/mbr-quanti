@@ -25,7 +25,7 @@ coeftest <- lmtest::coeftest
 
 # Introduction and Recap
 
-**One of the areas most intransparent for applied researchers is how to best compute standard errors**
+*One of the most obscure areas for applied researchers is how to best compute standard errors*
 
 Simple OLS assumes independent identically distributed errors in order for the standard errors to be correct (Go back to the Day 1 material to refresh you memory on this). However, this assumption is frequently implausible in observational studies. 
 
@@ -39,7 +39,7 @@ Rewriting the above equation in vector form $y = X\beta + u$ and going back to $
                      &= \underbrace{(X'X)^{-1}X'}_{\text{Weights}}\underbrace{E[uu'|X]}_{\text{Variance-Covariance of u}}\underbrace{X(X'X)^{-1}}_{\text{Weights}}\\
 \end{align}
 
-So, here again you can see, the variance of $\hat{\beta}$ (figuratively speaking: the amount of dart board that the estimator is spraying) is a function of the $E[uu'|X]$, variance-covariance matrix of the error term $u$. The more important the unmeasured influences in $u$ in terms of variation contribution for $Y$, the more it will interfere with measuring the relation between $Y$ and $X$. The joint effects of the $(X'X)^{-1}X'$ parts on both sides are similar in spirit to the scalar expression $\cdot\frac{x}{x^2}$, which means the less variation there is in $X$, the less precise is $\hat{\beta}$. However, what is also important in $(X'X)^{-1}X'$ is the covariance between the different variables -- $x_1$, $x_2$, $x_3$, etc. -- comprising $X$. This is where *colinearity* comes in, but we will talk about that later.
+So, here again you can see, the variance of $\hat{\beta}$ (figuratively speaking: the amount of dart board that the estimator is spraying) is a function of the $E[uu'|X]$, variance-covariance matrix of the error term $u$. The more important the unmeasured influences in $u$ in terms of variation contribution for $Y$, the more it will interfere with measuring the relation between $Y$ and $X$. 
 
 The key term remains $E[uu'|X]$, which given the focus of the whole discussion on $u$ -- the unmeasured influences -- so far shouldn't surprise you anymore. This is a matrix with has the form: 
 
@@ -82,7 +82,7 @@ $$var[\hat{\beta}|X] = (X'X)^{-1}\sigma^2_u IX(X'X)^{-1} = \sigma^2_u (X'X)^{-1}
 
 The problem is that quite often the unmeasured influences left in the error term have certain patterns (even if the unmeasured influences are uncorrelated with the treatment variable of interest). The key problems are: 
 
-- **Sampling issues** It could be that certain groups (like age groups, states, industries) are sampled more often than others. In that case, you do not have a random sample. The groups that are more likely to be sampled have are likely to have other unmeasured influences in common and thus the errors of observations in these groups will likely be correlated. Also, In essence you loose coefficient estimator precision. In the survey methods literature this is called *design effect* (I believe): "The design effect or Deff is the ratio of the actual variance of a sample to the variance of a simple random sample of the same number of elements" (Kish (1965), p.258)).
+- **Sampling issues** It could be that certain groups (like age groups, states, industries) are sampled more often than others. In that case, you do not have a random sample. The groups that are more likely to be sampled likely have other unmeasured influences in common and thus the errors of observations in these groups will likely be correlated. Also, In essence you loose coefficient estimator precision. In the survey methods literature this is called *design effect* (I believe): "The design effect or Deff is the ratio of the actual variance of a sample to the variance of a simple random sample of the same number of elements" (Kish (1965), p.258)).
 
 - The variance of the outcome varies with some variable. For example, the variance of income is usually higher among families belonging to top deciles of the income distribution than among low income families. (**heteroscedasticity**). 
 
@@ -117,7 +117,7 @@ Instead, one usually tries to find a fairly general standard error estimator tha
 
 # Some Intuition
 
-In most cases, cluster robust standard errors will actually be larger than homoscedastic ones. Here is my (probably grossly wrong) take on trying to explain why. The difference occurs because your assumption about the "randomness" of the error term serves as a benchmark on which to compare the actual amount of variation in the estimator's residuals. In the homoscedastic case, you assume everything is independently distributed. In a sense, that is a lot of variation (for a given level of magnitude of variation). Now assume instead, you have clusters in your data and observations belonging to the same cluster tend to move in the same direction. Then there is actually less variation across all observations than in the homoscedastic case. If you then compare your estimated residual variation with your benchmark from the homoscedastic case, you would think: okay the estimator looks reasonably precise given I assumed lots of variation across observations. If you instead change your benchmark to the cluster case, your estimated residual variation looks more in line with the cluster variation and your estimator looks much less precise given that benchmark. 
+In most cases, cluster robust standard errors will actually be larger than homoscedastic ones. Here is my (probably grossly oversimplifying) take on trying to explain why. The difference occurs because your assumption about the "randomness" of the error term serves as a benchmark on which to compare the actual amount of variation in the estimator's residuals. In the homoscedastic case, you assume everything is independently distributed. In a sense, that is a lot of variation (for a given level of magnitude of variation). Now assume instead, you have clusters in your data and observations belonging to the same cluster tend to move in the same direction. Then there is actually less variation across all observations than in the homoscedastic case. If you then compare your estimated residual variation with your benchmark from the homoscedastic case, you would think: okay the estimator looks reasonably precise given I assumed lots of variation across observations. If you instead change your benchmark to the cluster case, your estimated residual variation looks more in line with the cluster variation and your estimator looks much less precise given that benchmark. 
 
 let's look at an example of reduced residual variation:
 
@@ -168,21 +168,20 @@ In nearly every study that has a cross-section component, you should either use 
     1. You have clustering in the sampling and there is heterogeneity in the treatment effects,
     2. You have clustering in the assignment (each cluster has a different likelihood of its members being treated) and there is heterogeneity in the treatment effects.
     
-"In other words, heterogeneity in the treatment effects is now a requirement for clustering
-adjustments to be necessary, and beyond that, either clustering in sampling or assignment makes
-the adjustments important." [@Abadie.2017, p. 17]
+>In other words, heterogeneity in the treatment effects is now a requirement for clustering adjustments to be necessary, and beyond that, either clustering in sampling or assignment makes the adjustments important. [@Abadie.2017, p. 17]
 
 
 # Simulating Scenarios
 
-*Note: In all cases there is slight sampling clustering. We are going to ignore that but this alone, if severe, would be a reason to cluster if treatment is heterogeneous.*
+*Note: In all cases there is slight sampling clustering.*
 
 ## Simulating heterogeneous treatment and assignment
 
 ### Simulating the sample
+
 To understand these recommendations, we do another simulation. 
 
-Imagine a big population with 100 clusters. We draw each an observation repeatedly from this population. Each cluster has a certain probability of being sampled. And then within each cluster, there is a another probability of any member of the cluster being sampled. 
+Imagine a big population with 100 clusters. Each cluster has a certain probability of being sampled. And then within each cluster, there is a another probability of any member of the cluster being sampled. 
 
 ```{r}
 set.seed(999)
@@ -250,7 +249,7 @@ ggplot(data=trt_propens_by_cluster, aes(x=factor(c), y=Pr_T)) +
        y="Fraction of sampled obs having received treatment")
 ```
 
-Obviously the treatment probability is also heterogeneous across clusters. So, what to do? Actually. 
+Obviously the treatment probability is also heterogeneous across clusters.   
 
 ### Comparing Standard errors
 
@@ -266,7 +265,7 @@ fit3 <- felm(y ~ w | c | 0 | c, data=reg_data)
 stargazer(fit1, fit2, fit3, type="text", omit.stat = c("f", "ser"))
 ```
 
-So here we have actually three considerations. First, we should really use cluster fixed effects, due to the correlation between $w$ and cluster membership **and** the cluster effect on the outcome. Second, there is treatment heterogeneity and clustered sampling. That is a reason for using clustered standard errors. Third, there is clustered treatment assignment and treatment heterogeneity, which is another reason for clustered standard errors if you have fixed effects already included. We would use model (3) here.
+Here we have actually three considerations. First, we should really use cluster fixed effects, due to the correlation between $w$ and cluster membership **and** the cluster effect on the outcome. Second, there is treatment heterogeneity and clustered sampling. That is a reason for using clustered standard errors. Third, there is clustered treatment assignment and treatment heterogeneity, which is another reason for clustered standard errors if you have fixed effects already included. We would use model (3) here.
 
 
 
