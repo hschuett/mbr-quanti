@@ -1,13 +1,15 @@
 ---
-title: "Quantitative Methods -- Day 2: Other Regression Issues"
+title: 'Quantitative Methods -- Day 2: Other Regression Issues'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-bibliography: ../literature/bibliography.bib
-output: 
-  html_notebook: 
+output:
+  html_notebook:
     code_folding: none
     number_sections: yes
     toc: yes
+  pdf_document:
+    toc: yes
+bibliography: ../literature/bibliography.bib
 ---
 
 
@@ -20,7 +22,7 @@ library(dplyr)
 
 As you have realized by now, a key problem in social sciences is unobserved influences that are correlated with our variable of interest. For example, the 
 
-Sometimes we have panel data (or sometimes called longitudinal data): Data that has a time dimension. For example, firm observations for multiple years. In this case, we can get rid of some unobserved correlated influences if the unobserved influence has a certain form. The necessary for is that the correlated unobserved influence is invariant across one of the panel dimensions. For instance, if one where to measure the same students across multiple school years, their ability should not vary over the years (in contrast to their education, hopefully).
+Sometimes we have panel data (also called longitudinal data): Data that has a time dimension. For example, firm observations for multiple years. In this case, we can get rid of some unobserved correlated influences if the unobserved influence has a certain form. The necessary form is that the correlated unobserved influence is invariant across one of the panel dimensions. For instance, if one where to measure the same students across multiple school years, their ability should not vary over the years (in contrast to their education, hopefully).
 
 Imagine the following form: 
 
@@ -130,13 +132,13 @@ summary(lm(y ~ x, data=d4))
 summary(felm(y ~ x | time + individual | 0 | 0, data=d4))
 ```
 
-Btw. You do not want to estimate this yourself! Always use a software package for it. You can easily check that you get the coefficient correct but the standard errors all wrong:
+Btw. You do not want to estimate this yourself! Always use a software package for it. You can easily check that you get the coefficient correct; but the standard errors all wrong:
 
 ```{r}
 summary(lm(within_y ~ within_x, data=d4))
 ```
 
-This is because, even though you cancelled the individual and time effects, they are in the averages you took took out. So the normal standard error estimator uses the wrong number of variables to calculate the degrees of freedom. 
+This is because, even though you cancelled the individual and time effects, they are in the averages you took out. So the normal standard error estimator uses the wrong number of variables to calculate the degrees of freedom. 
 
 
 
