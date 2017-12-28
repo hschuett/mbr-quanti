@@ -120,14 +120,13 @@ You can always write me an e-mail; I am usually quick to respond. If you have lo
 - Identification as a population concept versus inferring from samples
 - Intro to graph theory
 
-*Excercise part: Intro to R + simulation and real data excercises to understand inference under uncertainty*
 
 ### Part 2: Regession Analysis I
 
 - Introduction to linear regression models
 - Basic assumptions and properties of linear regression models
 
-*Excercise part: Paper case 1: Replicating a study, reporting, interpreting, and analyzing regression output.*
+*Excercise part: Intro to R + simulation and real data excercises to understand inference under uncertainty*
 
 
 ## Thu, 11. Jan, 2018 - Day 2: Identification
@@ -151,7 +150,6 @@ You can always write me an e-mail; I am usually quick to respond. If you have lo
 - How to design a regression test. How not to test for mediation.
 - What variables to include and which **not** to include.
 
-*Excercise part: simulations*
 
 **After-class Reading:**
 
@@ -162,14 +160,14 @@ bib["Elwert.2014"]
 
 ## Wed, 17. Jan, 2018 - Day 3: Matching Estimators and Panel Models
 
-**ATTENTION: This day will be held in a different room: Edmund-Rumpler-Str. 13, B-103. Sorry for the inconvenience.**
+**ATTENTION: This day will be held in a different room: Edmund-Rumpler-Str. 13, B-103. Sorry for the inconvenience. Alternatively, we can move this day to Jan 18th.**
 
 ### Part 1: Panel Fixed-Effecs Models
 
 - Introducing advantages and disadvantages of panel models
 - Using panel models to control for unobserved confounders.
 
-*Excercise part: Replicating a study and computing fixed-effects models.*
+*Excercise part: Wrangling a typical dataset and computing fixed-effects models.*
 
 ### Part 2: Potential Outcomes and Control Groups
 
@@ -178,8 +176,6 @@ bib["Elwert.2014"]
 - Modern matching procedures
 - Comparison to linear regression
 - Synthetic control groups
-
-*Excercise part: Replicating a study and comparing matching and regression estimates.*
 
 ## Fr, 19. Jan, 2018 - Day 4: Instrumental Variables
 
@@ -190,7 +186,11 @@ bib["Elwert.2014"]
 - Estimation issues with instrumental variables. 
 - Why you should always look for instrumental variables and why you shouldn't
 
-*Excercise part: tba.*
+*Excercise part: Reviewing the following paper. Please read before class*
+
+```{r, echo = FALSE, results="asis"} 
+bib["Bernile.2017"]
+``` 
 
 ### Part 2: Stretch Block. 
 
@@ -198,7 +198,6 @@ bib["Elwert.2014"]
 - Question session. Chance to review key parts of the course. Chance for you to ask questions. 
 - Bigger paper replication.
 
-*Excercise part: tba.*
 
 ## Mon, 22. Jan, 2018 - Day 5: Natural Experiments
 
@@ -208,7 +207,7 @@ bib["Elwert.2014"]
 - Pre-/post treatment for treatment and control group in a natural experiment.
 - The all-important common trends assumption.
 
-*Excercise part: tba.*
+*Excercise part: Replicating a study.*
 
 ### Part 2: Regression Discontinuity
 
@@ -216,7 +215,7 @@ bib["Elwert.2014"]
 - Problems with RD designs.
 - Examples.
 
-*Excercise part: tba.*
+*Excercise part: Replicating a study.*
 
 ## Mon, 29. Jan, 2018 - Day 6: General Linear Models and Advanced Topics
 
@@ -228,11 +227,10 @@ bib["Elwert.2014"]
 - Poisson Regression.
 - Over-dispersion.
 
-*Excercise part: tba.*
+*Excercise part: Extending the in-class example*
 
-### Part 2: GMM and Bayesian Statistics
+### Part 2: Cluster robust standard errors
 
-- What to do if one equation is not enough
-- Intro to structural equation modelling
+- dealing with structure in the error term
+- discussion of deviations from homoscedasticity
 
-*Excercise part: tba.*
