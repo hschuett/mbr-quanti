@@ -17,9 +17,9 @@ library(MatchIt)  # matching procedures
 ```
 
 >... stay focused on the three key leaps of statistics:
-– Extrapolating from sample to population
-– Extrapolating from control to treatment conditions
-– Extrapolating from observed data to underlying constructs of interest.
+- Extrapolating from sample to population
+- Extrapolating from control to treatment conditions
+- Extrapolating from observed data to underlying constructs of interest.
 Whatever methods you use, consider directly how they address these issues. (Gelman on his [blog](http://www.statsblogs.com/2017/12/24/walk-a-crooked-miie/))
 
 
