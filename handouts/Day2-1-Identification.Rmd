@@ -298,16 +298,30 @@ summary(lm(y ~ x))
 summary(lm(y ~ x + mediator))
 ```
 
-## Summary
+# Identification needs theory and inference is important
+
+Below is a quote from Andrew Gelman's [blog](http://www.statsblogs.com/2017/12/29/forking-paths-plus-lack-of-theory-no-reason-to-believe-any-of-this/):
+
+> ... Forking paths plus lack of theory = No reason to believe any of this.
+Just to clarify: Yes, there’s some theory in the paper, kinda, but it’s the sort of theory that Jeremy Freese describes as “more vampirical than empirical--unable to be killed by mere evidence” because any of the theoretical explanations could go in either direction ... the theory makes no meaningful empirical predictions. ... Statistics educators, including myself, have to take much of the blame for this sad state of affairs.
+**We go around sending the message that it’s possible to get solid causal inference from experimental or observational data, as long as you have a large enough sample size and a good identification strategy.**
+People ... then take us at our word, gather large datasets, find identification strategies, and declare victory. The thing we didn’t say in our textbooks was that **this approach doesn’t work so well in the absence of clean data and strong theory.**  (emphasis mine)
+
+The point he is referring to is p-hacking, which we will discuss in more detail later and is the prime problem in inference. A great discussion by Uri Simonson titled "P-hacked Hypotheses Are Deceivingly Robust" can be found [here](http://datacolada.org/48). The key issue is that all the stuff that we discussed in the "quantifying uncertainty" section is distorted, once you do multiple tests with the same data. For example, if you can subset the data multiple ways and still be consistent with theory, or have multiple ways of of measuring your construct of interest. 
+
+Stated another way, if you have noisy data and vague theory that allows you many possible tests, you quickly end up noise-mining. And if you do it often enough, you will get a very strong but wrong result simply by chance. You actually here stuff like this in sports a lot. A typical noise mining statement would be "The Dodgers won 9 out of their last 13 night games played on artificial turf." (again a Gelman [example](http://www.statsblogs.com/2017/12/29/forking-paths-plus-lack-of-theory-no-reason-to-believe-any-of-this/), I liked). In scientific writing this is harder to spot and depends on your theory. For example, do you have a strong argument for why your treatment effect should be stronger for women between 20-33? If you slice the data often enough you will find some strong pattern, even if there is no real effect. And your finding will be highly significant. But that is because the significance test does indeed assume you do only one test multiple times, not many different tests and only "report" the significant ones. Your results from such a selective procedure are much more likely to be noise than the p-values suggests. 
+
+
+# Summary
 
 The preceding discussion should have highlighted a few things:
 
 1. You need theory of some sort for sound empirical analysis: Only theory can help you make sound assumptions about how the causal graph could look like. 
 1. You need to be very careful with post-treatment variables. Only include them if you really need to separate effects. 
 1. Be very careful if you are after mediator or direct effects, in some cases you might actually be better of resorting to structural equation models (which, we don't have time to discuss).
-1. If you only have weak theory, you can only reasonably identify broad average effects and need a good setting to do that. 
+1. If you only have weak theory, you can only reasonably identify broad average effects and need a good setting to do that and be very careful. 
 
-## Excercises
+# Excercises
 
 1. Assume you want to analyze the determinants of infant well-being. Open the *bwght2.csv* data set and design an analysis. Come up with a theory and design a test, taking into account confounding and endogenous selection bias. 
 

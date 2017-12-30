@@ -195,4 +195,9 @@ stargazer(frd_fit4, frd_fit5, type="text", omit.stat = c("f", "ser"))
 
 Of course, this is a local average treatment affect LATE. Can you exlain why?
 
+# Excercises
+
+1. Take a look at this [paper](http://ftp.iza.org/dp10779.pdf) and think about the identification strategy. 
+
 # References
+
