@@ -276,7 +276,20 @@ pt(q=2, df=n-2)
 
 So that probability is roughly 97.5% and the probability of seeing a value of 2 *or more* is 2.5% respectively. Since the t-distribution is symmetric, the same goes for -2. 
 
+## Problems when interpreting confidence intervals or p-values
 
+It is (somewhat) important to how to phrase your inferences from confidence intervals and p-values. For example, the following statement from @Gelman.2007, p. 20 is wrong (The authors say so [themsevlves](http://andrewgelman.com/2017/12/28/stupid-ass-statisticians-dont-know-goddam-confidence-interval/)): 
+
+> The hypothesis of whether a parameter is positive is directly assessed via its confidence interval. If both ends of the 95% confidence interval exceed zero, then we are at least 95% sure (under the assumptions of the model) that the parameter is positive.
+
+What would be better to say is that, **if all model assumptions are satisfied, then in repeated applications the 95% confidence intervals will include the true value 95% of the time.** This is *not* however the same as a precise statement about the *probability* of the parameter being poistive. You need more and stronger assumptions for that. (You need a prior distribution asumtption, which we will not discuss)
+
+Two important things to note:
+
+1. All inferences are conditional on your model being true!
+2. With classical methods, we are making statements about the probability of a true parameter being in a range *given infinite repititions of our experiment*, not about the probability of a parameter having a certain value. These are two very different concepts (At least to Statisticians)
+
+Many more insights can be gleamed for the American Statistics Association's [statment on p-values](http://amstat.tandfonline.com/doi/abs/10.1080/00031305.2016.1154108)
 
 # Asymptotics
 
