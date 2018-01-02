@@ -12,7 +12,7 @@ date: "Winter 2016/2017"
 
 email: "schuett@bwl.lmu.de"
 web: "github.com/hschuett/mbr-quanti"
-officehours: "tba"
+officehours: "Tue, 2pm-3pm"
 office: "Ludwigstrasse 28RG / Room 423"
 classroom: "Ludwigstrasse 28RG / Room 416"
 classhours: "9:00 am - 5:00 p.m."
@@ -32,7 +32,6 @@ bib <- ReadBib("literature/bibliography.bib")
 myopts <- BibOptions(bib.style = "authoryear", style="latex", first.inits=FALSE, max.names = 20)
 ```
 
-**This Syllabus is preliminary and will be updated continuously (and uploaded to github) till January 9th 2018**
 
 \begin{center}
 \textbf{Course Dates}
@@ -42,10 +41,12 @@ myopts <- BibOptions(bib.style = "authoryear", style="latex", first.inits=FALSE,
 |-----|--------------------|-------|-----------------|
 | 1   | Tue, 9.  Jan, 2018 | 416   | 9 am - 5 pm     |
 | 2   | Thu, 11. Jan, 2018 | 416   | 11:30 am - 7 pm |
-| 3   | Wed, 17. Jan, 2018 | B-103 | 9 am - 5 pm     |
+| 3   | Wed, 17. Jan, 2018 | 202*  | 9 am - 5 pm     |
 | 4   | Fri, 19. Jan, 2018 | 416   | 9 am - 5 pm     |
 | 5   | Mon, 22. Jan, 2018 | 416   | 9 am - 5 pm     |
 | 6   | Mon, 29. Jan, 2018 | 416   | 9 am - 5 pm     |
+
+*Kaulbachstr, 45, Raum 202
 
 # Course Description
 
@@ -160,7 +161,7 @@ bib["Elwert.2014"]
 
 ## Wed, 17. Jan, 2018 - Day 3: Matching Estimators and Panel Models
 
-**ATTENTION: This day will be held in a different room: Edmund-Rumpler-Str. 13, B-103. Sorry for the inconvenience. Alternatively, we can move this day to Jan 18th.**
+**ATTENTION: This day will be held in a different room: Kaulbachstr, 45, Raum 202. Alternatively, we can move this day to Jan 18th.**
 
 ### Part 1: Panel Fixed-Effecs Models
 
@@ -176,6 +177,13 @@ bib["Elwert.2014"]
 - Modern matching procedures
 - Comparison to linear regression
 - Synthetic control groups
+
+**After-class Reading:**
+
+```{r, echo = FALSE, results="asis"} 
+bib["Gelman.2011"]
+``` 
+
 
 ## Fr, 19. Jan, 2018 - Day 4: Instrumental Variables
 
