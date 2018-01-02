@@ -428,4 +428,18 @@ stargazer(fit1, fit2, fit3, rob_fit1, type="text", omit.stat = c("f", "ser"))
 Now, we neither have treatment heterogeneity nor cluster assignment heterogeneity (at least no systematical one). Here we would not use fixed-effects and simply use a heteroscedasticity robust estimator, which is model (4) (which comes out to the same thing, because we do not have heteroscedasticity here.)
 
 
+# Not everyone uses standard errors: 
+
+From [Gelman](http://www.statsblogs.com/2017/12/27/a-debate-about-robust-standard-errors-perspective-from-an-outsider/):
+
+>My colleague urged me to look at the debate more carefully, though, so I did. But before getting to that, let me explain where I’m coming from. I won’t be trying to make the “Holy Roman Empire” argument that they’re not robust, not standard, and not an estimate of error. I’ll just say why I haven’t found those methods useful myself, and then I’ll get to the debate.
+
+>The paradigmatic use case goes like this: You’re running a regression to estimate a causal effect. For simplicity suppose you have good identification and also suppose you have enough balance that you can consider your regression coefficient as some reasonably interpretable sort of average treatment effect. Further assume that your sample is representative enough, or treatment interactions are low enough, that you can consider the treatment effect in the sample as a reasonable approximation to the treatment effect in the population of interest.
+
+>But . . . your data are clustered or have widely unequal variances, so the assumption of a model plus independent errors is not appropriate. What you can do is run the regression, get an estimate and standard error, and then use some method of “robust standard errors” to inflate the standard errors so you get confidence intervals with close to nominal coverage.
+
+>That all sounds reasonable. And, indeed, robust standard errors are a popular statistical method. Also, speaking more generally, I’m a big fan of getting accurate uncertainties. See, for example, this paper, where Houshmand Shirani-Mehr, David Rothschild, Sharad Goel, and I argue that reported standard errors in political polls are off by approximately a factor of 2.
+
+>But this example also illustrates why I’m not so interested in robust standard errors: I’d rather model the variation of interest (in this case, the differences between polling averages and actual election outcomes) directly, and get my uncertainties from there.
+
 # Reference

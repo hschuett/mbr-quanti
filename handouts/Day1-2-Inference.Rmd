@@ -12,6 +12,22 @@ output:
 
 In the previous part we discussed that we are often mostly interested how average outcomes change going from one group of observations to another. But, we have not yet really discussed why we are interested in averages in the first place. That question leads to a host of inference problems and is the focus of this part.
 
+# What is statistical inference?
+
+Statistical inference means drawing conclusions based on data, but in a way that explicitely acknowledges uncertainty. For a very simple example, imagine you want to know how much faulty parts a machine produces. You sample 100 parts and you find 10% are faulty. What conclusions do you draw? Is the fault rate really 10%? Or might it be 5% and you simply had a bad sample by chance? Or might it be 20% and we had a luck sample by chance? This is inference: Estimating the fault rate of the machine from a sample and also quantify how uncertain our inferrence is. (e.g, imagine you get a 10% fault rate from a 10.000 parts sample. Are you more confident now that the fault rate is somewhere around 10%?)
+
+What is special about statistical inference is that it tries to draw conclusions by framing the proplem as: **deduce properties of some assumed underlying probability distribution of interest by analysing data.** The distribution of interest describes the population population of interest and its parameters aspects of the population we are interested in, such as mean parameters. In the above example, you could assume that faulty parts follow a poison distribution (because faulty parts are counts) and you want to know the mean of the distribution. It depends a bit on your statistical philosophy what this distribution represents: a) hypothetically repeated sampling (if we sample the machine regularly what would be the distribution of our sampled fault rates?) or b) our uncertainty (the so called bayesian view uses a probability distribution over hypotheses (h1: 10%, h2:, 10.1%, etc....))
+
+The above example might not immediately applicable to scientific questions, but the idea is exactly the same. If you take the standard text book example of "inferring" the returns to schooling (the effect additional years of education on yearly income), we must describe the population of interest and assume some sort of distribution of yearly income. For example we can assume that the Income follows are normal distibution with the mean of the distribution being a function of years of schooling ($Inc \sim N(a_0 + a_1 Scooling, \, \sigma^2)$). Then we have three aspects of the distribution ($a_0, a_1, \sigma^2$) that describe interesting aspects of the population of interest and we could infer what these parameters might look like from a regression. But we do not know the population, but only have a sample from it. 
+
+Inference then encompasses the whole process of deriving estimates and testing hypotheses (or other forms of assessing the uncertainty inherent in the estimates). We always assume that the observed data is somehow sampled from the (larger) population.
+
+Because this is mainstream, we will follow the frequentist approach of thinking about repeated sampling when formulating distributions. **From now on, when talking about a model, we mean all assumptions about the population and distributions to frame the construct of interest**. Always be mindful that are your **inferences are conditional on your assumed model**. The beauty of experiments is that you can often get aways with less assumptions, if done properly. 
+
+*(Btw: In contrast to inferential statistics, descriptive statistics is solely concerned with properties of the observed data. Descriptive statistics are an often under-appreciated part of the distribution (model) formulation.)*
+
+
+
 # Thinking about Causality and How We use Probability
 
 ## Nothing in the world is random
