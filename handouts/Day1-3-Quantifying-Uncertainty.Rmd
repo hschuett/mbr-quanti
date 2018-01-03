@@ -278,6 +278,8 @@ So that probability is roughly 97.5% and the probability of seeing a value of 2 
 
 ## Problems when interpreting confidence intervals or p-values
 
+> "... the distance between the data and the model prediction is measured using a test statistic (such as a t-statistic or a Chi squared statistic). The P value is then the probability that the chosen test statistic would have been at least as large as its observed value if every model assumption were correct, including the test hypothesis. … the P value can be viewed as a continuous measure of the compatibility between the data and the entire model used to compute it, ranging from 0 for complete incompatibility to 1 for perfect compatibility, and in this sense may be viewed as measuring the fit of the model to the data." --- Greenland, Sander, et al. "Statistical tests, P values, confidence intervals, and power: a guide to misinterpretations." European Journal of Epidemiology 31 (2016), p. 339.
+
 It is (somewhat) important to how to phrase your inferences from confidence intervals and p-values. For example, the following statement from @Gelman.2007, p. 20 is wrong (The authors say so [themsevlves](http://andrewgelman.com/2017/12/28/stupid-ass-statisticians-dont-know-goddam-confidence-interval/)): 
 
 > The hypothesis of whether a parameter is positive is directly assessed via its confidence interval. If both ends of the 95% confidence interval exceed zero, then we are at least 95% sure (under the assumptions of the model) that the parameter is positive.
