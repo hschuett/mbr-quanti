@@ -59,7 +59,39 @@ The coefficient on $x$ is the coefficient for $d=0$. It is pretty close to the t
 
 We will see interactions everywhere, so make sure you understand the rationale and interpretation. 
 
+## An example
 
+Take the rugged example from Richard McElreath's fantastic [book](https://github.com/rmcelreath/rethinking)
+
+```{r}
+rugged <- read.csv("../data/rugged.csv", sep=";")
+# make log version of outcome
+rugged$log_gdp <- log(rugged$rgdppc_2000)
+# extract countries with GDP data
+rugged <- rugged[complete.cases(rugged$rgdppc_2000), ]
+```
+
+This is data from the study @Nunn.2012 [(here)](https://scholar.harvard.edu/nunn/publications/ruggedness-blessing-bad-geography-africa). An often discussed question is whether terrain ruggedness hampers economic growht. If you plot terrain ruggedness against economic output, you get:
+
+```{r}
+ggplot(data=rugged, aes(x=rugged, y=log_gdp)) +
+  geom_point(alpha=0.2) +
+  geom_smooth(method="lm")
+```
+
+But, if you include a dummy interaction for whether a country is in africa or not, you get
+```{r}
+ggplot(data=rugged, aes(x=rugged, y=log_gdp, color=as.factor(cont_africa))) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+```{r}
+rmod <- lm(log_gdp ~ rugged*cont_africa, data=rugged)
+summary(rmod)
+```
+
+How do you interpret it and what might be the reason for the seemingly differtn behavior of African countries?
 
 # Colinearity
 
