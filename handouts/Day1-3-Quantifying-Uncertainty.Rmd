@@ -164,7 +164,7 @@ To repeat again what we are after: we want to know whether we can safely reject 
 
 Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). Similarly, a very high magnitude of the estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
 
-Remember that if you had 1000 hypothetical replications of your data, youyou would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Let's simulate that:
+Remember that if you had 1000 hypothetical replications of your data, you would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Let's simulate that:
 
 ```{r}
 set.seed(666)
