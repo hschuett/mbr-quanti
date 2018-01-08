@@ -1,13 +1,15 @@
 ---
-title: "Quantitative Methods -- Day 1: Quantifying Uncertainty"
+title: 'Quantitative Methods -- Day 1: Quantifying Uncertainty'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-bibliography: ../literature/bibliography.bib
-output: 
-  html_notebook: 
+output:
+  pdf_document:
+    toc: yes
+  html_notebook:
     code_folding: none
     number_sections: yes
     toc: yes
+bibliography: ../literature/bibliography.bib
 ---
 
 ```{r}
@@ -162,7 +164,7 @@ Set up a *null hypothesis* and an *alternative hypothesis*. For instance, often 
 
 To repeat again what we are after: we want to know whether we can safely reject $H_0$. That is, whether it is very unlikely, given the precision of our estimates, that the data our estimator saw could have been produced by a $\beta=0$. All the information we have to answer this question is our estimate $\hat{\beta}$ and its variance $\sigma(\hat{\beta})$. ... Or do we? Actually, we do not have this variance. That one is unknown to us too, since we cannot really do this hypothetical experiment of repeating our tests and we do not know how $E[uu'|X]$ really looks like. So we need to estimate this variance from the data too and using some assumption about $E[uu'|X]$, like the one we did above: $\hat{\sigma}(\hat{\beta})$. 
 
-Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates (\hat{\beta}) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). Similarly, a very high magnitude of the estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
+Now, armed with $\hat{\beta}$ and $\hat{\sigma}(\hat{\beta})$, how can we figure out how likely $\beta=0$ is? We need to take into account the precision of our estimator. One way of doing this is to construct a ratio $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Lower values will either be due to small magnitude estimates ($\hat{\beta}$) or imprecise estimation ($\hat{\sigma}(\hat{\beta})$). Similarly, a very high magnitude of the estimate, even if imprecisely estimated would still give a comparably high value of this ratio. We can thus make an argument that if this ratio is sufficiently far away from zero, then we can reject the possibility that $\beta=0$; at least in theory. Of course, we need to operationalize what we mean by "sufficiently" and here is where p-values come into play. 
 
 Remember that if you had 1000 hypothetical replications of your data, you would get 1000 different $\hat{\beta}$ because of the unmeasured influences $u$. The same goes for your estimate $\hat{\sigma}(\hat{\beta})$ since you need to estimate those from the data as well. Consequently, you would get 1000 ratios $\hat{\beta} / \hat{\sigma}(\hat{\beta})$. Let's simulate that:
 

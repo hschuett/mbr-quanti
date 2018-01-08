@@ -71,7 +71,6 @@ All of the course will be taught in R. You will be given code and learn how to i
 - gridExtra
 - scatterplot3d
 - MatchIt
-- *(list will be updated)*
 
 
 # Reading
@@ -92,7 +91,7 @@ bib[1:4]
 bib["McElreath.2016", "Tufte.1990"]
 ``` 
 
-# Course Policiy
+# Course Policy
 
 ## Attendance Policy
 

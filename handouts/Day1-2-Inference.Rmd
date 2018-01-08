@@ -1,13 +1,15 @@
 ---
-title: "Quantitative Methods -- Day 1: Inference"
+title: 'Quantitative Methods -- Day 1: Inference'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-bibliography: ../literature/bibliography.bib
-output: 
-  html_notebook: 
+output:
+  pdf_document:
+    toc: yes
+  html_notebook:
     code_folding: none
     number_sections: yes
     toc: yes
+bibliography: ../literature/bibliography.bib
 ---
 
 In the previous part we discussed that we are often mostly interested how average outcomes change going from one group of observations to another. But, we have not yet really discussed why we are interested in averages in the first place. That question leads to a host of inference problems and is the focus of this part.
