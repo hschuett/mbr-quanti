@@ -71,6 +71,8 @@ All of the course will be taught in R. You will be given code and learn how to i
 - gridExtra
 - scatterplot3d
 - MatchIt
+- stargazer
+- skimr
 
 
 # Reading
