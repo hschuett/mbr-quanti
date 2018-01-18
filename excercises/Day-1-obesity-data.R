@@ -6,6 +6,9 @@ library(tidyverse)
 # data souce:
 # https://catalog.data.gov/dataset/nutrition-physical-activity-and-obesity-behavioral-risk-factor-surveillance-system
 # https://www.cdc.gov/brfss/data_documentation/index.htm
+# documentation for the sampling:
+#     https://www.cdc.gov/brfss/
+
 survey<- read.csv("data/Nutrition_Physical_Activity_and_Obesity.csv")
 # this dataset has a weird structure.
 # Let's look at it a while
@@ -69,3 +72,7 @@ ggplot(data=new_data) +
 
 
 # Now let them play with the sub samples....
+
+
+cor(new_data %>% select(starts_with("Q")),
+    use="complete.obs") %>% round(2)
