@@ -3,9 +3,7 @@ title: 'Quantitative Methods -- Day 2: Identifcation'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  html_notebook:
-    code_folding: none
-    number_sections: yes
+  pdf_document:
     toc: yes
   html_document:
     df_print: paged
@@ -286,15 +284,21 @@ In this case, including *Z* into the regression ($Y = a_0 + a_1X + a_2W+a_3M+a_4
 
 ## Examples
 
-Let's see what could be the problem; let's simulate an intermediate variable bias [@Rosenbaum.1984]
+Let's see what could be the problem; let's simulate an intermediate variable bias [@Rosenbaum.1984]. Change the amount of confounder variation to see the problem.
+
+```{r}
+rnorm(n=10, mean=1, sd=2)
+```
+
 
 ```{r}
 set.seed(1234)
 n <- 200
 x <- rnorm(n, mean=0, sd=2)
-interm_conf <-  rnorm(n, mean=0, sd=1)
+interm_conf <-  rnorm(n, mean=0, sd=2)
 mediator <- 0.3*x + 2 * interm_conf + rnorm(n, mean=2, sd=1.5)
-y <- x + mediator + 2* interm_conf + rnorm(n, mean=0, sd=1)
+y <- 1 * x + mediator + 2* interm_conf + rnorm(n, mean=0, sd=1)
+
 summary(lm(y ~ x + mediator + interm_conf))
 
 summary(lm(y ~ x))

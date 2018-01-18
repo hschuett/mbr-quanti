@@ -5,10 +5,6 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   pdf_document:
     toc: yes
-  html_notebook:
-    code_folding: none
-    number_sections: yes
-    toc: yes
 bibliography: ../literature/bibliography.bib
 ---
 
@@ -91,7 +87,20 @@ Now, below I give you a data set with wage data. It contains the following varia
 Let's look at the data:
 
 ```{r}
+# setwd("c:/")
 wages_data <- read.csv("../data/wage_sample1.csv")
+```
+
+
+```{r}
+wages_data$education
+wages_data[, "education"]
+# dataframe[row_index, column_index]
+```
+
+
+
+```{r}
 par(mfrow=c(1,2))  # set graphics options to 1 row and 2 columns
 cblue <- rgb(0.2, 0.3, 0.4, 0.9)  # define a color
 # 1st histogram

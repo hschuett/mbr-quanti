@@ -226,7 +226,7 @@ abline(v=c(-2, 2))
 With values greater 1.96 *or less* occurring with probability:
 
 ```{r}
-pnorm(1.96, mean=0, sd=1)
+pnorm(-1.96, mean=0, sd=1)
 ```
 
 So, we know that there is a 2.5% chance of seeing a ratio greater than 1.96 if our ratios where drawn from a standard normal distribution. Unfortunately, they are not since we do not know $\sigma^2$ in $\sigma^2(X'X)^{-1}$. We need to estimate it.
@@ -273,7 +273,7 @@ Well, (due to rounding) the probability of seeing a value of 8 or less is 1. Let
 ```{r}
 # using the t-probability function to compute the prob
 # to see a value of 8 or less
-pt(q=2, df=n-2)
+pt(q=3, df=n-2)
 ```
 
 So that probability is roughly 97.5% and the probability of seeing a value of 2 *or more* is 2.5% respectively. Since the t-distribution is symmetric, the same goes for -2. 
@@ -291,7 +291,7 @@ What would be better to say is that, **if all model assumptions are satisfied, t
 Two important things to note:
 
 1. All inferences are conditional on your model being true!
-2. With classical methods, we are making statements about the probability of a true parameter being in a range *given infinite repititions of our experiment*, not about the probability of a parameter having a certain value. These are two very different concepts (At least to Statisticians)
+2. With classical methods, we are making statements about the probability of a "true" parameter being in a range *given infinite repititions of our experiment*, not about the probability of a parameter having a certain value. These are two very different concepts (At least to Statisticians)
 
 Many more insights can be gleamed for the American Statistics Association's [statment on p-values](http://amstat.tandfonline.com/doi/abs/10.1080/00031305.2016.1154108)
 

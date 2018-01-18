@@ -1,13 +1,14 @@
 ---
-title: "Quantitative Methods -- Day 2: Other Regression Issues"
+title: 'Quantitative Methods -- Day 2: Other Regression Issues'
 author: "Harm H. Schuett"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-bibliography: ../literature/bibliography.bib
-output: 
-  html_notebook: 
-    code_folding: none
-    number_sections: yes
+output:
+  html_document:
+    df_print: paged
     toc: yes
+  pdf_document:
+    toc: yes
+bibliography: ../literature/bibliography.bib
 ---
 
 
@@ -19,6 +20,8 @@ library(ggplot2)
 
 # Interactions
 
+TODO: ADD DISCUSSION MODERATOR MEDIATOR
+
 Often you see something that is called an interaction in regressions: 
 
 $$y_i = a_0 + a_1 x_i + a_2 d_i + a_3 x_i c_i + u_i$$
@@ -29,6 +32,7 @@ The purpose of such creating such a dummy variable and fitting a regression as t
 
 1. Allow for different regression slopes for each group.
 1. Provide and easy test for whether the difference between slopes is statistically significant. 
+
 
 ```{r}
 set.seed(2345)
@@ -75,7 +79,7 @@ This is data from the study @Nunn.2012 [(here)](https://scholar.harvard.edu/nunn
 
 ```{r}
 ggplot(data=rugged, aes(x=rugged, y=log_gdp)) +
-  geom_point(alpha=0.2) +
+  geom_point(alpha=0.7) +
   geom_smooth(method="lm")
 ```
 
@@ -87,11 +91,11 @@ ggplot(data=rugged, aes(x=rugged, y=log_gdp, color=as.factor(cont_africa))) +
 ```
 
 ```{r}
-rmod <- lm(log_gdp ~ rugged*cont_africa, data=rugged)
+rmod <- lm(log_gdp ~ rugged + cont_africa + rugged:cont_africa, data=rugged)
 summary(rmod)
 ```
 
-How do you interpret it and what might be the reason for the seemingly differtn behavior of African countries?
+How do you interpret it and what might be the reason for the seemingly different behavior of African countries?
 
 # Colinearity
 
