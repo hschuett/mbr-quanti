@@ -1,0 +1,135 @@
+---
+title: "Quantitative Methods -- Summary of Main Take Aways"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's create a List of the key aspects you should have taken aways from each lecture. Things that you should understand. And if not read up on them again. As you can imagine, these are the aspects that I will try to test you on in the exam as well. 
+
+# Key takeaways Day 1
+
+## Regression basics
+
+### What is a regression?
+
+### Why do we often want a multivariate regression analysis?
+
+### How do you interpret regression coefficients?
+
+
+
+## Inference
+
+### What is inference?
+
+### What is a model and what is it not?
+
+### Why is inference hard?
+
+
+
+## Quantifiying uncertainty?
+
+### Where does uncertainty in our inferences come from?
+
+### Why would we want to quantify that?
+
+### How does hypothesis testing work?
+
+### How do you properly interpret a p-value?
+
+
+
+# Key takeaways Day 2
+
+## Identification
+
+### What is Identification?
+
+### How do Identification and Inference compare?
+
+### What is a confounder?
+
+### Explain how confounder gives rise to a biased estimate (correlated omitted variable bias)
+
+
+
+## Other regression issues
+
+### What is the purpose of interaction terms and how do you interpret them?
+
+### What are mediator variables and why can they be problematic?
+
+### What are colliders and what is endogenous selection bias?
+
+### Explain how measurement error in your key X variable can affect your inferences
+
+
+
+# Key takeaways Day 3
+
+## Panel models
+
+### What are fixed effects?
+
+### What problem do they solve?
+
+### How can you estimate them?
+
+### How are regression results of regressions including fixed effects to be interpreted?
+
+
+
+## Potential outcomes and matching
+
+### What are potential outcomes and what is the fundamental problem of causal inference?
+
+### Why is missing at random a very desirable assumption? What assumptions do you not need to make?
+
+### What problems does matching adress?
+
+### What is the downside of matching methods?
+
+### What is imbalance and why is it a problem?
+
+### What is lack of overlap and why is it a problem?
+
+
+
+# Key takeaways Day 4
+
+## Instrumental variables
+
+### What problem does an instrumental variables approach adress?
+
+### What is the rationale for an instrumetnal variables approach? 
+
+### What prerequisites do you need for an IV and which of those can you test to which degree?
+
+
+
+## Differences-in-Differences
+
+### What problem does a difference-in-differences design adress?
+
+### What is the key assumption necessary for diff-in-diff designs to work?
+
+### Can you express a diff-in-diff design with the right fixed-effects regression?
+
+### What is the difference between diff-in-diff designs and fixed-effects designs?
+
+
+
+# Key takeaways Day 5
+
+## Regression Discontinuity
+
