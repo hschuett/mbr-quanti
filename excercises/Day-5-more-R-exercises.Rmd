@@ -1,0 +1,238 @@
+---
+title: "A quick R cheat sheet"
+author: "Harm H. Schuett"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document: 
+    number_sections: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Note: There is a very nice, free book on using R for data science using the tidyverse tools: http://r4ds.had.co.nz/ *
+
+# Quick refresher:
+
+## Basic Building blocks
+
+### Vectors
+
+In R try to think in vectors (in other languages similar to lists or arrays)
+```{r}
+# c() stands for "concatenate"
+vec1 <- c(10, 20, 15, 40)  # numeric vector
+vec2 <- c("a", "b", "c", NA)  # character vector
+vec3 <- c(TRUE, FALSE, TRUE, TRUE)  # logical vector
+vec4 <- gl(4, 1, 4, label = c("l1", "l2", "l3", "l4"))  # factor with 4 levels
+```
+
+referencing vectors:
+```{r}
+length(vec1)  # 4
+print(vec1[1])  # 10
+print(vec1[1:3])  # 10, 20, 15
+```
+
+
+### Variable Types
+
+As you can see from the comments to the right of the vectors, they contain different types
+of data. Numeric, character, logical, of factors. Each type of data needs to be one of
+these four types. Numeric can be further divided into integer or real numeric data. 
+
+```{r}
+vec1i <- as.integer(vec1)
+typeof(vec1i)
+```
+
+```{r}
+vec1d <- vec1i + 0.1
+print(vec1d)
+print(typeof(vec1d))
+```
+
+In data analysis applications, quite a few operations work differently for different datatypes. For example:
+
+```{r}
+summary(vec1)
+```
+
+```{r}
+summary(vec2)
+```
+
+Because computing mean, median, etc is non-sensical for text data
+
+### Matrices, Data.frames
+
+matrices are 2 dimensional vectors, that hold the same type of variable. Dataframes are 
+also two dimensional, but each column can hold a different type of variable.
+
+```{r}
+mat1 <- matrix(c(1,2,3,4.1,5,6), ncol=2)
+print(mat1)
+print(typeof(mat1))
+```
+
+```{r}
+df1 <- data.frame(x1=c(1,2,3),
+                  x2=c(4.1,5,6))
+print(df1)
+```
+
+data.frames can also have column names that you can access via the dollar sign. You can do much less stuff with matrices. In turn they are more leight-weight and are faster. For most applications though, such as holding a common dataset use data.frames (or their newer cousin, the tibble)
+
+### Functions
+
+Everything you do in R involves taking some type of data, stored in variables, vectors, matrices, data.frames, etc. and apply functions to it.
+
+You should think of functions as a generalization of what you know from you math classes. For example, the function f(x) = 2\*x takes x as *input* and produces as output 2\*x. 
+
+```{r}
+mult_by_two <- function(x) {
+  return(2*x)
+}
+mult_by_two(c(1,3,9))
+```
+
+In general, any function takes a bunch of inputs and *returns* an output:
+
+```{r}
+sort(vec1)  # sort function
+rep(1:3, 5)  # repeat function
+seq(1, 10, by = 2)  # produce sequence function
+is.na(vec2)  # check for NA function
+ifelse(vec1 / 10 == 2, "this is 20", "this is not 20") # ifelse function
+```
+
+**The problem with learning any programming language is to get a feeling for what functions are called. For example, you might know which operation you might want to do. But you don't know what the function is called that performs this function. That is knowledge that you acquired over time. The best way to get that knowledge is google "R <description of the operation you are trying to perform>", to be honest. Develop strong google-fu skills and you will quickly learn any programming language.**
+
+This holds for all functions, such as plot, lm, ifelse, etc. 
+
+```{r}
+plot(vec1i, # input 1
+     vec1d) # input 2
+# output is the graph
+```
+
+## Packages
+
+A huge advantage of R is the sheer number of sophisticated algorithms, data tranformation procedures, plotting possibilities, etc. that someone somehow programed into a function. You can download these and install them in so called packages. For example, the dplyr package is a collection of functions that make working with and transforming tabular data nice and easy. ggplot2 is a package that has a bunch of functions that together create nice graphs, stargazer has just one function, but that one takes various regression models as inputs and outputs well-formated regression tables. 
+
+To load packages you simply need to say: 
+
+```{r}
+library(dplyr)
+```
+
+*Note: you should always put all your library statements at the beginning of your sript. You don't have to, but it makes it easy to see what the required packages are to run the file.* 
+
+## Dplyr functions -- Data transformation verbs
+
+The idea behind dplyr, called the grammar of data transformation, is that each data transformation task can be expressed as a combination of a few basic tasks or building blocks that you can express as a verb. These verbs in the dplyr version of the grammar of data transformation are: 
+
+- select() 	*select columns*
+- rename() 	*renames columns*
+- filter() 	*filter rows*
+- arrange() *re-order or arrange rows*
+- mutate() 	*create new columns or overwrite existing ones*
+- summarise() *summarise values*
+- group_by() 	*allows for group operations in the "split-apply-combine" concept*
+
+Let's load a dataset and take a look at those functions
+
+```{r}
+dta <- read.table("../data/congress.data", header = TRUE)
+head(dta) # function that shows first 6 rows
+```
+
+```{r}
+select(dta, # first input: dataset
+       STATE2, STATE # further inputs: the variables of interest
+       )
+```
+
+this is similar to:
+```{r}
+dta[, c("STATE2", "STATE")]
+```
+
+**R has the advantage/disadvantage that there is often many ways of doing the same thing**
+
+if you want to store your data transformation, you have to do so explicitely:
+
+```{r}
+state_vars <- select(dta, # first input: dataset
+                     STATE2, STATE # further inputs: the variables of interest
+                     )
+head(state_vars)
+```
+
+### The pipe operator
+
+Part of the dplyr package is the %>% operator that we have used many times. dplyr imports this operator from another package (magrittr). This operator allows you to pipe the output from one function to the input of another function. Instead of nesting functions (reading from the inside to the outside), the idea of of piping is to read the functions from left to right. Or from top to bottom, depending on how you format your code.
+
+Instead of: 
+
+```{r}
+head(select(dta, STATE2, STATE), 2)
+```
+
+you can write:
+
+```{r}
+dta %>% select(STATE2, STATE) %>% head(2)
+```
+
+alternatively:
+
+    dta %>% 
+      select(STATE2, STATE) %>% 
+      head(2)
+
+The *only* benefit of using the pipe is readability. I personally are a big fan of it, which is why you find it in much of my code. 
+
+### mutate
+
+This function, creates or overwrites/modifies columns in your dataframe
+
+```{r}
+dta %>% 
+  mutate(change_DVote = DVOTE94 - DVOTE92) %>% 
+  select(STATE2, DVOTE94, DVOTE92, change_DVote) %>% 
+  head()
+```
+
+again, there is multiple ways of doing this. You could do this without mutate, simply as:
+
+    dta$change_DVote  <-  dta$DVOTE94 - dta$DVOTE92
+
+But then you have to type dta$ all the time. mutate is a nice convenience funtion and can be nicely used in a pipe chain. 
+
+*By the way, do you see the data error?*
+
+### group by and summarize
+
+group_by splits the data frame into sub-dataframes based on the variables you enter and performs the following operations on each sub frame separately. This is especially handy when computing summary statistics, rolling windows, etc. 
+
+For example, say we want the mean percentage of votes that went republican in the districts for each state:
+
+```{r}
+dta %>% 
+  # compute percentage
+  mutate(PercRep = DVOTE92/ (DVOTE92 + RVOTE92 + OTHER92)) %>% 
+  group_by(STATE2) %>% 
+  summarize(AvgPercRep = mean(PercRep))
+```
+
+You can see this operation can be composed of three dplyr verbs: mutate, groupby, and then summarize, which we chain together using the pipe operator.
+
+# Excercise
+
+1. Use ggplot2 to plot the percentage of Democrats votes for 92 and 94 per state
+1. Plot the change in percantage Democrates per state
+1. Count the number of districts per state that have more than 50% Republican vote share
+1. Compare the average percentage of Republicans across districts per state to the percentage of the sum of votes over all districts.
