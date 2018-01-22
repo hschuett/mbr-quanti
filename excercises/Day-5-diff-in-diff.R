@@ -2,7 +2,7 @@
 # Package Import ----------------------------------------------------------
 library(stargazer)
 library(dplyr)
-
+# setwd("GitRepos/QuantitativeMethods/")
 # Data Import -------------------------------------------------------------
 data_0 <- read.table("data/njmin/public.dat", quote="\"", comment.char="", na.strings=".", stringsAsFactors=FALSE)
 str(data_0)
@@ -20,6 +20,7 @@ str(data_0)
 # PA2            19       19     1.0   1 if in PA, Easton etc
 # SHORE          21       21     1.0   1 if on NJ shore
 #
+
 # First Interview
 # NCALLS         23       24     2.0   number of call-backs*
 # EMPFT          26       30     5.2   # full-time employees
@@ -132,6 +133,13 @@ colnames(data_0) <- var_names
 
 
 # Replicating Key Table3 and Table4 from SAS code -------------------------
+
+# %>% take what's on the left an pipe it to the next step
+data_1 <- data_0
+
+# data_1$FTE <- data_1$EMPPT*.5 + data_1$EMPFT + data_1$NMGRS
+# data_1$FTE <- 2
+
 data_1 <- data_0  %>%
   mutate(FTE = EMPPT*.5 + EMPFT + NMGRS,
          FTE2 = EMPPT2*.5 + EMPFT2 + NMGRS2) %>%
@@ -149,9 +157,10 @@ data_1 <- data_0  %>%
 table3_data <- data_1 %>%
   mutate(grp = if_else(NJ == 0, "PA", "NJ")) %>%
   group_by(grp) %>%
-  summarize(FTE = round(mean(FTE, na.rm=T),2),
-            FTE2 = round(mean(FTE2, na.rm=T),2))
+  summarize(FTE = round(mean(FTE, na.rm=TRUE),2),
+            FTE2 = round(mean(FTE2, na.rm=TRUE),2))
 table3_data
+
 summary(lm(DEMP ~ NJ, data=data_1))
 
 table_4_data <- data_1 %>%
@@ -162,15 +171,19 @@ tab4_col2 <- lm(DEMP ~ NJ + BK + KFC + ROYS + CO_OWNED, data=table_4_data)
 tab4_col3 <- lm(DEMP ~ GAP, data=table_4_data)
 tab4_col4 <- lm(DEMP ~ GAP + BK + KFC + ROYS + CO_OWNED, data=table_4_data)
 tab4_col5 <- lm(DEMP ~ GAP + BK + KFC + ROYS + CO_OWNED + CENTRALJ + SOUTHJ + PA1 + PA2, data=table_4_data)
-stargazer(tab4_col1, tab4_col2, tab4_col3, tab4_col4, tab4_col5, type="text", omit.stat=c("f", "ser"))
+stargazer(tab4_col1, tab4_col2, tab4_col3, tab4_col4, tab4_col5,
+          type="text", omit.stat=c("f", "ser"))
 
 
 # Diff-in-Diff Regression -------------------------------------------------
+ ## table_4_data %>% select(FTE, NJ)
+ # table_4_data[, c("FTE", "NJ")]
 wave_1 <- table_4_data[ ,c("FTE", "NJ", "BK", "KFC", "ROYS", "CO_OWNED", "CENTRALJ", "SOUTHJ", "PA1", "PA2")]
 wave_1$PERIOD <- "0"
 wave_2 <- table_4_data[ ,c("FTE2", "NJ", "BK", "KFC", "ROYS", "CO_OWNED", "CENTRALJ", "SOUTHJ", "PA1", "PA2")]
 colnames(wave_2) <- c("FTE", "NJ", "BK", "KFC", "ROYS", "CO_OWNED", "CENTRALJ", "SOUTHJ", "PA1", "PA2")
 wave_2$PERIOD <- "1"
+long_data <- rbind(wave_1, wave_2)
 
 Atab4_col1 <- lm(FTE ~ NJ * PERIOD, data=long_data)
 Atab4_col2 <- lm(FTE ~ NJ * PERIOD + BK + KFC + ROYS + CO_OWNED, data=long_data)  # not the correct comparison
